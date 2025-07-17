@@ -1,0 +1,32 @@
+.home-container {
+  padding: 20px;
+}
+
+.user-header {
+  text-align: center;
+  margin-bottom: 70px;
+}
+
+.user-header h2 {
+  font-size: 24px;
+}
+
+.user-header p {
+  font-size: 16px;
+  color: #555;
+}
+
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 16px;
+}
+
+@media (max-width: 480px) {
+  .user-header h2 {
+    font-size: 20px;
+  }
+  .user-header p {
+    font-size: 14px;
+  }
+}
