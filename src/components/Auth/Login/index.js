@@ -5,10 +5,12 @@ import Lottie from "lottie-react";
 import busAnimation from "../../assets/yWegn1eidv.json";
 import { auth, provider } from "../../../firebase";
 import { signInWithEmailAndPassword, signInWithPopup } from "firebase/auth";
+import { useNavigate } from "react-router-dom";
 
 const Login = ({ setUser }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -18,6 +20,7 @@ const Login = ({ setUser }) => {
         name: result.user.displayName || "Student",
         email: result.user.email,
       });
+      navigate("/home");
     } catch (error) {
       alert(error.message);
     }
@@ -27,9 +30,10 @@ const Login = ({ setUser }) => {
     try {
       const result = await signInWithPopup(auth, provider);
       setUser({
-        name: result.user.displayName,
+        name: result.user.displayName || "Google User",
         email: result.user.email,
       });
+      navigate("/home");
     } catch (error) {
       alert("Google sign-in failed!");
     }
@@ -71,7 +75,6 @@ const Login = ({ setUser }) => {
 
       <p className="or-text">or</p>
 
-      {/* ✅ Embedded SVG Google Button */}
       <button onClick={handleGoogleLogin} className="google-btn">
         <span className="google-icon">
           <svg width="20" height="20" viewBox="0 0 533.5 544.3">
