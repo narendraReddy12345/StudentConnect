@@ -1,0 +1,71 @@
+.dept-container {
+  padding: 20px;
+  max-width: 1000px;
+  margin: auto;
+  text-align: center;
+  font-family: 'Segoe UI', sans-serif;
+}
+
+.dept-title {
+  font-size: 26px;
+  margin-bottom: 20px;
+  font-weight: 600;
+  color: #222;
+}
+
+.dept-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr); /* Always 2 columns */
+  gap: 20px;
+  justify-content: center;
+}
+
+.dept-card {
+  background-color: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+  aspect-ratio: 1 / 1; /* Keeps it square always */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  transition: transform 0.2s;
+}
+
+.dept-card:hover {
+  transform: scale(1.03);
+  background-color: #f5faff;
+}
+
+.dept-animation {
+  width: 80px;
+  height: 80px;
+  margin-bottom: 10px;
+}
+
+.dept-card h3 {
+  font-size: 18px;
+  color: #333;
+}
+
+/* Responsive tweaks for very small screens */
+@media screen and (max-width: 500px) {
+  .dept-grid {
+    grid-template-columns: repeat(2, 1fr); /* Still 2 per row */
+    gap: 14px;
+  }
+
+  .dept-card {
+    padding: 12px;
+  }
+
+  .dept-card h3 {
+    font-size: 16px;
+  }
+
+  .dept-animation {
+    width: 70px;
+    height: 70px;
+  }
+}

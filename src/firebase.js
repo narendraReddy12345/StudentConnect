@@ -1,19 +1,39 @@
+// src/firebase.js
 import { initializeApp } from "firebase/app";
-import { getAuth, GoogleAuthProvider } from "firebase/auth";
+import { 
+  getAuth, 
+  GoogleAuthProvider,
+  browserLocalPersistence,
+  setPersistence
+} from "firebase/auth";
+import { getFirestore } from "firebase/firestore";
+import { getStorage } from "firebase/storage";
 
 const firebaseConfig = {
-apiKey: "AIzaSyDP8A28rW-9bT-Ckd5LsUsG7UYb0dWnvAw",
-authDomain: "klu-bus.firebaseapp.com",
-projectId: "klu-bus",
-storageBucket: "klu-bus.firebasestorage.app",
-messagingSenderId: "538100107159",
-appId: "1:538100107159:web:36f322edea2a695907a6d2",
-measurementId: "G-CYQ1WXT5D8"
-  
+  apiKey: "AIzaSyAdinzjaFo1gyUOArehFT7UcEnb-dnQL8o",
+  authDomain: "edconnect-9bf3e.firebaseapp.com",
+  projectId: "edconnect-9bf3e",
+  storageBucket: "edconnect-9bf3e.appspot.com", // Fixed storage bucket URL
+  messagingSenderId: "1013054246189",
+  appId: "1:1013054246189:web:0a86abb5b2a27f83d817a4",
+  measurementId: "G-0NFKZFFYWN"
 };
 
+// Initialize Firebase
 const app = initializeApp(firebaseConfig);
+
+// Initialize Auth with persistence
 const auth = getAuth(app);
 const provider = new GoogleAuthProvider();
 
-export { auth, provider };
+// Set persistence (optional)
+setPersistence(auth, browserLocalPersistence)
+  .catch((error) => {
+    console.error("Persistence setting error:", error);
+  });
+
+// Initialize other services
+const db = getFirestore(app);
+const storage = getStorage(app);
+
+export { auth, provider, db, storage };
