@@ -1,7 +1,7 @@
 
 import "./index.css";
 import FeatureCard from "../../FeatureCard";
-import { useNavigate } from "react-router-dom";
+import { useHistory} from "react-router-dom";
 
 
 // Corrected import paths
