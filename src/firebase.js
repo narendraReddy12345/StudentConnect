@@ -13,7 +13,7 @@ const firebaseConfig = {
   apiKey: "AIzaSyAdinzjaFo1gyUOArehFT7UcEnb-dnQL8o",
   authDomain: "edconnect-9bf3e.firebaseapp.com",
   projectId: "edconnect-9bf3e",
-  storageBucket: "edconnect-9bf3e.appspot.com", // Fixed storage bucket URL
+  storageBucket: 'edconnect-9bf3e.firebasestorage.app', // Fixed storage bucket URL
   messagingSenderId: "1013054246189",
   appId: "1:1013054246189:web:0a86abb5b2a27f83d817a4",
   measurementId: "G-0NFKZFFYWN"

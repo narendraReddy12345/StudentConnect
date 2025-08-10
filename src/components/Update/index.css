@@ -1,0 +1,126 @@
+/* Updates.css */
+.updates-container {
+  padding: 16px;
+  max-width: 100%;
+  margin: 0 auto;
+  font-family: 'Segoe UI', Roboto, sans-serif;
+}
+
+.updates-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 24px;
+  position: relative;
+}
+
+.updates-header h2 {
+  font-size: 1.8rem;
+  color: #2d3748;
+  margin: 0 auto;
+  font-weight: 600;
+}
+
+.back-button {
+  background: none;
+  border: none;
+  color: #4a5568;
+  font-size: 1rem;
+  cursor: pointer;
+  padding: 8px;
+  position: absolute;
+  left: 0;
+}
+
+.back-button:hover {
+  color: #2d3748;
+}
+
+.loading-spinner,
+.no-updates {
+  text-align: center;
+  padding: 40px 0;
+  color: #4a5568;
+}
+
+.updates-list {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.update-card {
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
+}
+
+.update-image-container {
+  width: 100%;
+  height: 200px;
+  overflow: hidden;
+}
+
+.update-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.update-content {
+  padding: 16px;
+}
+
+.update-title {
+  font-size: 1.4rem;
+  color: #2d3748;
+  margin: 0 0 8px 0;
+  font-weight: 600;
+}
+
+.update-info {
+  font-size: 1rem;
+  color: #4a5568;
+  margin: 0 0 12px 0;
+  line-height: 1.5;
+}
+
+.update-meta {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.85rem;
+  color: #718096;
+}
+
+.update-date {
+  font-style: italic;
+}
+
+.update-author {
+  font-weight: 500;
+}
+
+/* Responsive adjustments */
+@media (max-width: 480px) {
+  .updates-header h2 {
+    font-size: 1.5rem;
+  }
+  
+  .update-image-container {
+    height: 180px;
+  }
+  
+  .update-title {
+    font-size: 1.3rem;
+  }
+  
+  .update-info {
+    font-size: 0.95rem;
+  }
+  
+  .update-meta {
+    flex-direction: column;
+    gap: 4px;
+  }
+}
