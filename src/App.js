@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from "react";
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter as Router, Route, Switch, Redirect } from "react-router-dom";
 import { auth } from "./firebase";
 import { onAuthStateChanged } from "firebase/auth";
+
+// Components
 import Login from "./components/Auth/Login";
 import Home from "./components/DashBoard";
 import Departments from "./components/Departments";
@@ -21,12 +23,9 @@ function App() {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
 
   useEffect(() => {
-    const handleResize = () => {
-      setIsMobile(window.innerWidth < 768);
-    };
-
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
   }, []);
 
   useEffect(() => {
@@ -36,15 +35,15 @@ function App() {
           uid: firebaseUser.uid,
           name: firebaseUser.displayName || "Student",
           email: firebaseUser.email,
-          isAdmin: firebaseUser.email === "99220041116@klu.ac.in" || 
-                  firebaseUser.email === "admin@klu.ac.in"
+          isAdmin:
+            firebaseUser.email === "99220041116@klu.ac.in" ||
+            firebaseUser.email === "admin@klu.ac.in"
         });
       } else {
         setUser(null);
       }
       setLoading(false);
     });
-
     return () => unsubscribe();
   }, []);
 
@@ -59,69 +58,107 @@ function App() {
 
   return (
     <Router>
-      <div className={`app-container ${isMobile ? 'mobile' : 'desktop'}`}>
-        <Routes>
-          {/* Authentication */}
+      <div className={`app-container ${isMobile ? "mobile" : "desktop"}`}>
+        <Switch>
+          {/* Auth Route */}
           <Route
+            exact
             path="/"
-            element={!user ? <Login setUser={setUser} isMobile={isMobile} /> : <Navigate to="/home" />}
+            render={() =>
+              !user ? (
+                <Login setUser={setUser} isMobile={isMobile} />
+              ) : (
+                <Redirect to="/home" />
+              )
+            }
           />
-          
-          {/* Main App Routes */}
+
+          {/* Main Routes */}
           <Route
             path="/home"
-            element={
-              user ? <Home user={user} setUser={setUser} isMobile={isMobile} /> : <Navigate to="/" />
+            render={() =>
+              user ? (
+                <Home user={user} setUser={setUser} isMobile={isMobile} />
+              ) : (
+                <Redirect to="/" />
+              )
             }
           />
           <Route
             path="/departments"
-            element={user ? <Departments isMobile={isMobile} /> : <Navigate to="/" />}
+            render={() =>
+              user ? <Departments isMobile={isMobile} /> : <Redirect to="/" />
+            }
           />
           <Route
-            path="/faculty/:dept"  // New faculty list route
-            element={user ? <FacultyList isMobile={isMobile} /> : <Navigate to="/" />}
+            path="/faculty/:dept"
+            render={() =>
+              user ? <FacultyList isMobile={isMobile} /> : <Redirect to="/" />
+            }
           />
           <Route
             path="/events"
-            element={user ? <Events isMobile={isMobile} /> : <Navigate to="/" />}
+            render={() =>
+              user ? <Events isMobile={isMobile} /> : <Redirect to="/" />
+            }
           />
           <Route
             path="/forms"
-            element={user ? <Forms isMobile={isMobile} /> : <Navigate to="/" />}
+            render={() =>
+              user ? <Forms isMobile={isMobile} /> : <Redirect to="/" />
+            }
           />
           <Route
             path="/map"
-            element={user ? <CampusMap isMobile={isMobile} /> : <Navigate to="/" />}
+            render={() =>
+              user ? <CampusMap isMobile={isMobile} /> : <Redirect to="/" />
+            }
           />
           <Route
             path="/ai-help"
-            element={user ? <AIAssistant isMobile={isMobile} /> : <Navigate to="/" />}
+            render={() =>
+              user ? <AIAssistant isMobile={isMobile} /> : <Redirect to="/" />
+            }
           />
 
           {/* Admin Routes */}
           <Route
             path="/admin"
-            element={
-              user?.isAdmin ? <AdminHome isMobile={isMobile} /> : <Navigate to="/home" />
+            exact
+            render={() =>
+              user?.isAdmin ? (
+                <AdminHome isMobile={isMobile} />
+              ) : (
+                <Redirect to="/home" />
+              )
             }
           />
           <Route
             path="/admin/faculty"
-            element={
-              user?.isAdmin ? <FacultyManagement isMobile={isMobile} /> : <Navigate to="/home" />
+            render={() =>
+              user?.isAdmin ? (
+                <FacultyManagement isMobile={isMobile} />
+              ) : (
+                <Redirect to="/home" />
+              )
             }
           />
           <Route
             path="/admin/events"
-            element={
-              user?.isAdmin ? <EventsManagement isMobile={isMobile} /> : <Navigate to="/home" />
+            render={() =>
+              user?.isAdmin ? (
+                <EventsManagement isMobile={isMobile} />
+              ) : (
+                <Redirect to="/home" />
+              )
             }
           />
-          
-          {/* 404 Fallback */}
-          <Route path="*" element={<Navigate to={user ? "/home" : "/"} />} />
-        </Routes>
+
+          {/* Fallback */}
+          <Route
+            render={() => <Redirect to={user ? "/home" : "/"} />}
+          />
+        </Switch>
       </div>
     </Router>
   );

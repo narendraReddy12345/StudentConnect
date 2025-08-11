@@ -1,4 +1,3 @@
-// src/components/Login/Login.jsx
 import React, { useState, useEffect } from "react";
 import "./index.css";
 import { FiMail, FiLock, FiEye, FiEyeOff } from "react-icons/fi";
@@ -7,7 +6,7 @@ import Lottie from "lottie-react";
 import busAnimation from "../../assets/yWegn1eidv.json";
 import { auth, provider } from "../../../firebase";
 import { signInWithEmailAndPassword, signInWithPopup, signOut } from "firebase/auth";
-import { useNavigate } from "react-router-dom";
+import { useHistory } from "react-router-dom"; // Changed from useNavigate
 
 // Meme images for non-college email attempts
 const MEMES = [
@@ -26,7 +25,7 @@ const Login = ({ setUser }) => {
   const [showMeme, setShowMeme] = useState(false);
   const [currentMeme, setCurrentMeme] = useState("");
   const [welcomeAnimation, setWelcomeAnimation] = useState(false);
-  const navigate = useNavigate();
+  const history = useHistory(); // Changed from useNavigate
 
   useEffect(() => {
     setWelcomeAnimation(true);
@@ -70,7 +69,7 @@ const Login = ({ setUser }) => {
         email: userEmail,
         isAdmin: userEmail === adminEmail,
       });
-      navigate("/home");
+      history.push("/home"); // Changed from navigate
     } catch (error) {
       let errorMessage = "Login failed. Please try again.";
       if (error.code === "auth/invalid-credential") {
@@ -101,7 +100,7 @@ const Login = ({ setUser }) => {
         email: userEmail,
         isAdmin: userEmail === adminEmail,
       });
-      navigate("/home");
+      history.push("/home"); // Changed from navigate
     } catch (error) {
       alert("Google sign-in failed. Please try again.");
     } finally {

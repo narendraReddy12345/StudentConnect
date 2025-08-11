@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useHistory } from "react-router-dom";  // Changed from useNavigate
 import { motion } from "framer-motion";
 import './index.css';
 import FeatureCard from "../FeatureCard";
@@ -12,12 +12,10 @@ import eeeAnim from "../assets/34ZNnga4BN.json";
 import civilAnim from "../assets/y7ura4rwDL.json";
 import mbaAnim from '../assets/5xPSLhVoOz.json';
 import agriAnim from '../assets/eIjokjtCGL.json';
-
-
 import itAnim from '../assets/VKhYjb22FM.json'
 
 const Departments = () => {
-  const navigate = useNavigate();
+  const history = useHistory();  // Changed from useNavigate
   const [isHovering, setIsHovering] = useState(false);
 
   const departments = [
@@ -25,55 +23,55 @@ const Departments = () => {
       code: "cse", 
       name: "Computer Science", 
       animation: csAnim, 
-      onClick: () => navigate("/faculty/cse") 
+      onClick: () => history.push("/faculty/cse")  // Changed from navigate
     },
     { 
       code: "mech", 
       name: "Mechanical", 
       animation: mechAnim, 
-      onClick: () => navigate("/faculty/mech") 
+      onClick: () => history.push("/faculty/mech") 
     },
     { 
       code: "ece", 
       name: "Electronics & Communication", 
       animation: eceAnim, 
-      onClick: () => navigate("/faculty/ece") 
+      onClick: () => history.push("/faculty/ece") 
     },
     { 
       code: "eee", 
       name: "Electrical & Electronics", 
       animation: eeeAnim, 
-      onClick: () => navigate("/faculty/eee") 
+      onClick: () => history.push("/faculty/eee") 
     },
     { 
       code: "civil", 
       name: "CIVIL", 
       animation: civilAnim, 
-      onClick: () => navigate("/faculty/civil") 
+      onClick: () => history.push("/faculty/civil") 
     },
     { 
       name: "Information Technology", 
       code: "it", 
       animation: itAnim, 
-      onClick: () => navigate("/faculty/it") 
+      onClick: () => history.push("/faculty/it") 
     },
     { 
       name: "Master of Business Administration", 
       code: "mba", 
       animation: mbaAnim, 
-      onClick: () => navigate("/faculty/mba") 
+      onClick: () => history.push("/faculty/mba") 
     },
     { 
       name: "Agriculture", 
       code: "agri", 
       animation: agriAnim, 
-      onClick: () => navigate("/faculty/agri") 
+      onClick: () => history.push("/faculty/agri") 
     },
     { 
       name: "Bio-Technology", 
       code: "Bio-tech", 
       animation: itAnim, 
-      onClick: () => navigate("/faculty/Bio") 
+      onClick: () => history.push("/faculty/Bio") 
     },
   ];
 
@@ -82,7 +80,7 @@ const Departments = () => {
       {/* Back Arrow */}
       <motion.div 
         className="nav-arrow left"
-        onClick={() => navigate(-1)}
+        onClick={() => history.goBack()}  // Changed from navigate(-1)
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.9 }}
         onHoverStart={() => setIsHovering(true)}
@@ -131,7 +129,7 @@ const Departments = () => {
       {/* Home Arrow */}
       <motion.div 
         className="nav-arrow home"
-        onClick={() => navigate("/")}
+        onClick={() => history.push("/")}  // Changed from navigate("/")
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.9 }}
       >

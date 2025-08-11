@@ -1,8 +1,6 @@
-
 import "./index.css";
 import FeatureCard from "../../FeatureCard";
-import { useNavigate } from "react-router-dom";
-
+import { useHistory } from "react-router-dom";  // Changed from useNavigate
 
 // Corrected import paths
 import facultyAdminAnim from '../.././../assets/wckZq0erh9.json';
@@ -11,11 +9,8 @@ import updatesAdminAnim from '../.././../assets/Ltz69bkEEA.json';
 import formsAdminAnim from '../.././../assets/KE3rP60rHv.json';
 import mapAdminAnim from '../.././../assets/t9sC61E7hk.json';
 
-
 const AdminHome = ({ user, setUser }) => {
-  const navigate = useNavigate();
- 
-  
+  const history = useHistory();  // Changed from useNavigate
 
   return (
     <div className="dashboard-container">
@@ -25,7 +20,6 @@ const AdminHome = ({ user, setUser }) => {
             <h2>Welcome Admin, {user?.name || "Administrator"} 👋</h2>
             <p className="user-email">99220041116@klu.ac.in</p>
           </div>
-          
         </div>
       </div>
 
@@ -33,29 +27,28 @@ const AdminHome = ({ user, setUser }) => {
         <FeatureCard
           title="Add Faculty"
           animationData={facultyAdminAnim}
-          onClick={() => navigate("/admin/faculty")}
+          onClick={() => history.push("/admin/faculty")}  // Changed from navigate
         />
         <FeatureCard
           title="Add Events"
           animationData={eventAdminAnim}
-          onClick={() => navigate("/admin/events")}
+          onClick={() => history.push("/admin/events")}
         />
         <FeatureCard
           title="Manage Updates"
           animationData={updatesAdminAnim}
-          onClick={() => navigate("/admin/updates")}
+          onClick={() => history.push("/admin/updates")}
         />
         <FeatureCard
           title="Manage Forms"
           animationData={formsAdminAnim}
-          onClick={() => navigate("/admin/forms")}
+          onClick={() => history.push("/admin/forms")}
         />
         <FeatureCard
           title="Manage Campus Map"
           animationData={mapAdminAnim}
-          onClick={() => navigate("/admin/map")}
+          onClick={() => history.push("/admin/map")}
         />
-        
       </div>
     </div>
   );

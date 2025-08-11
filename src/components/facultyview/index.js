@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useHistory } from 'react-router-dom'; // Changed from useNavigate
 import { collection, getDocs, query, where } from 'firebase/firestore';
 import { db } from '../../firebase';
 import { FiSearch, FiUser, FiMail, FiPhone, FiHome, FiChevronLeft } from 'react-icons/fi';
@@ -7,7 +7,7 @@ import './index.css';
 
 const FacultyList = () => {
   const { dept } = useParams();
-  const navigate = useNavigate();
+  const history = useHistory(); // Changed from useNavigate
   const [faculty, setFaculty] = useState([]);
   const [filteredFaculty, setFilteredFaculty] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
@@ -17,14 +17,14 @@ const FacultyList = () => {
   // Get department full name from code
   const getDeptName = (code) => {
     const deptNames = {
-    'cse': 'cse',
-    'Mechanical Engineering': 'mech',
-    'ece': 'ece',
-    'eee': 'eee',
-    'civil': 'civil',
-    'it': 'it',
-    'mba': 'mba',
-    'agri': 'agri'
+      'cse': 'cse',
+      'Mechanical Engineering': 'mech',
+      'ece': 'ece',
+      'eee': 'eee',
+      'civil': 'civil',
+      'it': 'it',
+      'mba': 'mba',
+      'agri': 'agri'
     };
     return deptNames[code] || code;
   };
@@ -79,7 +79,7 @@ const FacultyList = () => {
       <header className="faculty-header">
         <button 
           className="back-button"
-          onClick={() => navigate(-1)}
+          onClick={() => history.goBack()} // Changed from navigate(-1)
         >
           <FiChevronLeft size={24} />
         </button>

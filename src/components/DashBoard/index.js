@@ -1,9 +1,7 @@
-
-// src/components/DashBoard/index.js
 import React, { useState } from "react";
 import "./index.css";
 import FeatureCard from "../FeatureCard";
-import { useNavigate } from "react-router-dom";
+import { useHistory } from "react-router-dom"; // Changed from useNavigate
 import { auth } from "../../firebase";
 import { signOut } from "firebase/auth";
 
@@ -14,8 +12,9 @@ import formAnim from "../assets/KE3rP60rHv.json";
 import collegeMap from "../assets/t9sC61E7hk.json";
 import updatesAnim from "../assets/Ltz69bkEEA.json";
 import adminAnim from '../assets/IGeZmAD5Dp.json';
+
 const Home = ({ user, setUser }) => {
-  const navigate = useNavigate();
+  const history = useHistory(); // Changed from useNavigate
   const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   const handleLogout = async () => {
@@ -28,7 +27,7 @@ const Home = ({ user, setUser }) => {
         setUser(null);
       }
       
-      navigate("/");
+      history.push("/"); // Changed from navigate("/")
     } catch (error) {
       console.error("Logout error:", error);
       alert(error.message || "Logout failed. Please try again.");
@@ -63,38 +62,38 @@ const Home = ({ user, setUser }) => {
         <FeatureCard
           title="Faculty 🔍"
           animationData={facultyAnim}
-          onClick={() => navigate("/departments")}
+          onClick={() => history.push("/departments")} // Changed from navigate
         />
         <FeatureCard
           title="Event Registrations"
           animationData={eventAnim}
-          onClick={() => navigate("/events")}
+          onClick={() => history.push("/events")}
         />
         <FeatureCard
           title="Updates"
           animationData={updatesAnim}
-          onClick={() => navigate("/updates")}
+          onClick={() => history.push("/updates")}
         />
         <FeatureCard
           title="Form Details"
           animationData={formAnim}
-          onClick={() => navigate("/forms")}
+          onClick={() => history.push("/forms")}
         />
         <FeatureCard
           title="Campus Map"
           animationData={collegeMap}
-          onClick={() => navigate("/map")}
+          onClick={() => history.push("/map")}
         />
         <FeatureCard
           title="AI Assistant"
           animationData={aiAnim}
-          onClick={() => navigate("/ai-help")}
+          onClick={() => history.push("/ai-help")}
         />
         {user?.isAdmin && (
           <FeatureCard
             title="Admin Panel 🔒"
             animationData={adminAnim}
-            onClick={() => navigate("/admin")}
+            onClick={() => history.push("/admin")}
           />
         )}
       </div>
