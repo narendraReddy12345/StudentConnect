@@ -1,126 +1,193 @@
-/* Updates.css */
-.updates-container {
-  padding: 16px;
-  max-width: 100%;
-  margin: 0 auto;
-  font-family: 'Segoe UI', Roboto, sans-serif;
+/* Reels Style Updates Feed */
+.reels-container {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  background-color: #000;
+  color: #fff;
+  overflow: hidden;
 }
 
-.updates-header {
+.reels-loading-container,
+.reels-empty-container {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  background-color: #000;
+  color: #fff;
+}
+
+.reels-empty-container .reels-back-btn {
+  margin-top: 1rem;
+  padding: 0.75rem 1.5rem;
+  background-color: #0095f6;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 500;
+}
+
+.reels-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 10;
+  padding: 1rem;
   display: flex;
   align-items: center;
-  margin-bottom: 24px;
-  position: relative;
+  justify-content: space-between;
+  background: linear-gradient(to bottom, rgba(0,0,0,0.5), transparent);
 }
 
-.updates-header h2 {
-  font-size: 1.8rem;
-  color: #2d3748;
-  margin: 0 auto;
+.reels-back-btn {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 1.2rem;
+  cursor: pointer;
+  z-index: 11;
+}
+
+.reels-title {
+  margin: 0;
+  font-size: 1.2rem;
   font-weight: 600;
 }
 
-.back-button {
-  background: none;
-  border: none;
-  color: #4a5568;
-  font-size: 1rem;
-  cursor: pointer;
-  padding: 8px;
-  position: absolute;
-  left: 0;
+.reels-header-spacer {
+  width: 24px; /* For balance */
 }
 
-.back-button:hover {
-  color: #2d3748;
+.reels-content {
+  height: 100%;
+  overflow-y: scroll;
+  scroll-snap-type: y mandatory;
 }
 
-.loading-spinner,
-.no-updates {
-  text-align: center;
-  padding: 40px 0;
-  color: #4a5568;
-}
-
-.updates-list {
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-}
-
-.update-card {
-  background: white;
-  border-radius: 12px;
-  overflow: hidden;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-  transition: all 0.3s ease;
-}
-
-.update-image-container {
+.reel {
+  height: 100vh;
   width: 100%;
-  height: 200px;
-  overflow: hidden;
+  position: relative;
+  scroll-snap-align: start;
 }
 
-.update-image {
+.reel-media-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.reel-media-container img,
+.reel-media-container video {
   width: 100%;
   height: 100%;
   object-fit: cover;
 }
 
-.update-content {
-  padding: 16px;
+.reel-info-overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 1.5rem;
+  padding-right: 80px; /* Space for action buttons */
+  background: linear-gradient(to top, rgba(0,0,0,0.7), transparent);
 }
 
-.update-title {
-  font-size: 1.4rem;
-  color: #2d3748;
-  margin: 0 0 8px 0;
+.reel-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.reel-important-badge {
+  background-color: #ed4956;
+  color: white;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  font-weight: bold;
+}
+
+.reel-update-title {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.3rem;
   font-weight: 600;
 }
 
-.update-info {
-  font-size: 1rem;
-  color: #4a5568;
-  margin: 0 0 12px 0;
+.reel-update-description {
+  margin: 0;
   line-height: 1.5;
+  color: rgba(255, 255, 255, 0.9);
 }
 
-.update-meta {
+.reel-actions {
+  position: absolute;
+  right: 1rem;
+  bottom: 6rem;
   display: flex;
-  justify-content: space-between;
-  font-size: 0.85rem;
-  color: #718096;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
 }
 
-.update-date {
-  font-style: italic;
+.reel-action-btn {
+  background: none;
+  border: none;
+  color: white;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  cursor: pointer;
 }
 
-.update-author {
-  font-weight: 500;
+.reel-action-btn span {
+  font-size: 0.8rem;
+}
+
+/* Animation for new reels */
+.reel-enter {
+  opacity: 0;
+  transform: translateY(20px);
+}
+
+.reel-enter-active {
+  opacity: 1;
+  transform: translateY(0);
+  transition: all 0.3s ease;
 }
 
 /* Responsive adjustments */
-@media (max-width: 480px) {
-  .updates-header h2 {
+@media (min-width: 768px) {
+  .reels-container {
+    max-width: 450px;
+    margin: 0 auto;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+  }
+  
+  .reel-info-overlay {
+    padding: 2rem;
+    padding-right: 100px;
+  }
+  
+  .reel-update-title {
     font-size: 1.5rem;
   }
   
-  .update-image-container {
-    height: 180px;
-  }
-  
-  .update-title {
-    font-size: 1.3rem;
-  }
-  
-  .update-info {
-    font-size: 0.95rem;
-  }
-  
-  .update-meta {
-    flex-direction: column;
-    gap: 4px;
+  .reel-actions {
+    right: 1.5rem;
   }
 }

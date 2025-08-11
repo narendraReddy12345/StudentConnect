@@ -8,17 +8,17 @@ import Login from "./components/Auth/Login";
 import Home from "./components/DashBoard";
 import Departments from "./components/Departments";
 import LoadingSpinner from "./components/LoadingSpinner";
-
+import UpdatesFeed from "./components/Update";
 import EventDetails from "./components/EventDetails";
 import EventRegistration from './components/Events'
-import Forms from "./components/Forms";
+
 import CampusMap from "./components/CampusMap";
 import AIAssistant from "./components/AIAssistant";
 import AdminHome from "./components/Adminpanel/home";
 import FacultyManagement from "./components/Adminpanel/Faculty";
 import EventsManagement from "./components/Adminpanel/Events";
 import FacultyList from "./components/facultyview";
-
+import UpdatesAdmin from "./components/Adminpanel/updateAdmin";
 function App() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -116,9 +116,9 @@ function App() {
             }
           />
           <Route
-            path="/forms"
+            path="/updates"
             render={() =>
-              user ? <Forms isMobile={isMobile} /> : <Redirect to="/" />
+              user ? <UpdatesFeed isMobile={isMobile} /> : <Redirect to="/" />
             }
           />
           <Route
@@ -161,6 +161,16 @@ function App() {
             render={() =>
               user?.isAdmin ? (
                 <EventsManagement isMobile={isMobile} />
+              ) : (
+                <Redirect to="/home" />
+              )
+            }
+          />
+          <Route
+            path="/admin/updates"
+            render={() =>
+              user?.isAdmin ? (
+                <UpdatesAdmin isMobile={isMobile} />
               ) : (
                 <Redirect to="/home" />
               )

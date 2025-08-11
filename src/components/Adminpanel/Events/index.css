@@ -398,7 +398,9 @@ form {
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
-
+.uph1{
+  margin-left: 24px;
+}
 .event-details {
   margin-bottom: 1.5rem;
 }
