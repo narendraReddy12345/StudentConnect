@@ -1,0 +1,458 @@
+/* ===== Event Details Mobile CSS - Unique Class Names ===== */
+.kl-event-detail-root {
+  max-width: 100%;
+  min-height: 100vh;
+  background-color: #f8f9fa;
+  padding-bottom: 80px;
+}
+
+/* Header Styles */
+.kl-event-navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  background: rgba(0, 0, 0, 0.4);
+  z-index: 100;
+  backdrop-filter: blur(5px);
+}
+
+.kl-event-nav-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.kl-event-nav-btn {
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.kl-event-nav-btn.active {
+  color: #ff4757;
+}
+
+/* Hero Section */
+.kl-event-hero {
+  position: relative;
+  height: 300px;
+  overflow: hidden;
+}
+
+.kl-event-hero-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.kl-event-hero-fallback {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, #4361ee 0%, #3f37c9 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+}
+
+.kl-event-hero-overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 60%;
+  background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, transparent 100%);
+}
+
+.kl-event-hero-title {
+  position: absolute;
+  bottom: 20px;
+  left: 20px;
+  right: 20px;
+  color: white;
+  font-size: 1.75rem;
+  font-weight: 700;
+  margin: 0;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}
+
+/* Quick Info Bar */
+.kl-event-meta-bar {
+  display: flex;
+  justify-content: space-around;
+  padding: 16px 0;
+  background: white;
+  border-bottom: 1px solid #e9ecef;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.kl-event-meta-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-size: 0.8rem;
+  color: #6c757d;
+  min-width: 80px;
+}
+
+.kl-event-meta-item svg {
+  margin-bottom: 4px;
+  color: #4361ee;
+  font-size: 1.1rem;
+}
+
+/* Registration Bar */
+.kl-event-register-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  background: white;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  margin-bottom: 16px;
+}
+
+.kl-event-attendees {
+  display: flex;
+  align-items: center;
+  color: #6c757d;
+  font-size: 0.9rem;
+}
+
+.kl-event-attendees svg {
+  margin-right: 6px;
+  color: #4361ee;
+}
+
+.kl-event-register-btn {
+  background: #4361ee;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.kl-event-register-btn.registered {
+  background: #4cc9f0;
+}
+
+/* Tab Navigation */
+.kl-event-tab-nav {
+  display: flex;
+  border-bottom: 1px solid #e9ecef;
+  margin: 0 16px;
+}
+
+.kl-event-tab-btn {
+  flex: 1;
+  padding: 14px 0;
+  background: none;
+  border: none;
+  color: #6c757d;
+  font-weight: 600;
+  position: relative;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.kl-event-tab-btn.active {
+  color: #4361ee;
+}
+
+.kl-event-tab-btn.active::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 25%;
+  right: 25%;
+  height: 3px;
+  background: #4361ee;
+  border-radius: 3px 3px 0 0;
+}
+
+/* Tab Content */
+.kl-event-tab-content {
+  padding: 16px;
+  animation: klFadeIn 0.3s ease-out;
+}
+
+@keyframes klFadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Details Section */
+.kl-event-detail-section {
+  margin-bottom: 24px;
+}
+
+.kl-event-detail-heading {
+  display: flex;
+  align-items: center;
+  color: #212529;
+  margin-bottom: 12px;
+  font-size: 1.1rem;
+}
+
+.kl-event-detail-heading svg {
+  margin-right: 8px;
+  color: #4361ee;
+}
+
+.kl-event-detail-text {
+  color: #6c757d;
+  line-height: 1.6;
+  margin: 0;
+  font-size: 0.95rem;
+}
+
+.kl-event-deadline-warning {
+  color: #f72585;
+  font-weight: 600;
+}
+
+/* Video Container */
+.kl-event-media-container {
+  position: relative;
+  padding-bottom: 56.25%;
+  height: 0;
+  overflow: hidden;
+  margin-top: 12px;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+}
+
+.kl-event-media-container video {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+/* Comments Section */
+.kl-event-comments-list {
+  margin-bottom: 16px;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.kl-event-no-comments {
+  color: #6c757d;
+  text-align: center;
+  padding: 40px 0;
+}
+
+.kl-event-comment-item {
+  padding: 12px 0;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.kl-event-comment-author {
+  font-weight: 600;
+  color: #212529;
+  margin-bottom: 4px;
+  font-size: 0.95rem;
+}
+
+.kl-event-comment-body {
+  color: #6c757d;
+  margin-bottom: 4px;
+  font-size: 0.9rem;
+}
+
+.kl-event-comment-time {
+  font-size: 0.75rem;
+  color: #6c757d;
+}
+
+.kl-event-comment-form {
+  display: flex;
+  margin-top: 16px;
+  border: 1px solid #e9ecef;
+  border-radius: 20px;
+  overflow: hidden;
+}
+
+.kl-event-comment-input {
+  flex: 1;
+  padding: 10px 16px;
+  border: none;
+  outline: none;
+  font-size: 0.9rem;
+}
+
+.kl-event-comment-submit {
+  background: #4361ee;
+  color: white;
+  border: none;
+  padding: 0 16px;
+  cursor: pointer;
+}
+
+/* Location Section */
+.kl-event-map-placeholder {
+  height: 200px;
+  background: #f1f3f5;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  margin-bottom: 12px;
+  color: #6c757d;
+}
+
+.kl-event-map-placeholder svg {
+  color: #4361ee;
+  margin-bottom: 8px;
+  font-size: 2rem;
+}
+
+.kl-event-map-link {
+  display: flex;
+  align-items: center;
+  color: #4361ee;
+  text-decoration: none;
+  margin-bottom: 12px;
+  font-size: 0.9rem;
+}
+
+.kl-event-map-link svg {
+  margin-right: 6px;
+}
+
+.kl-event-address {
+  background: #f8f9fa;
+  padding: 12px;
+  border-radius: 8px;
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+.kl-event-no-location {
+  color: #6c757d;
+  text-align: center;
+  padding: 40px 0;
+}
+
+/* Floating Action Button */
+.kl-event-fab {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #4361ee;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 30px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  box-shadow: 0 6px 16px rgba(67, 97, 238, 0.3);
+  cursor: pointer;
+  z-index: 10;
+  animation: klPulse 2s infinite;
+}
+
+@keyframes klPulse {
+  0% { box-shadow: 0 0 0 0 rgba(67, 97, 238, 0.7); }
+  70% { box-shadow: 0 0 0 12px rgba(67, 97, 238, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(67, 97, 238, 0); }
+}
+
+/* Loading States */
+.kl-event-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  padding: 20px;
+  text-align: center;
+}
+
+.kl-event-spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid rgba(0, 0, 0, 0.1);
+  border-radius: 50%;
+  border-top-color: #4361ee;
+  animation: spin 1s ease-in-out infinite;
+  margin-bottom: 16px;
+}
+
+/* Error States */
+.kl-event-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  padding: 20px;
+  text-align: center;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 480px) {
+  .kl-event-hero-title {
+    font-size: 1.5rem;
+  }
+  
+  .kl-event-meta-bar {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 12px;
+    gap: 8px;
+  }
+  
+  .kl-event-meta-item {
+    flex-direction: row;
+    gap: 8px;
+    min-width: auto;
+  }
+  
+  .kl-event-tab-content {
+    padding: 12px;
+  }
+  
+  .kl-event-fab {
+    width: 90%;
+    justify-content: center;
+  }
+}
+
+/* Micro-interactions */
+.kl-event-nav-btn:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.kl-event-register-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(67, 97, 238, 0.3);
+}
+
+.kl-event-tab-btn {
+  transition: color 0.2s;
+}
+
+.kl-event-comment-submit:hover {
+  background: #3a56d4;
+}

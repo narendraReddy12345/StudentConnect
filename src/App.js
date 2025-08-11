@@ -8,7 +8,9 @@ import Login from "./components/Auth/Login";
 import Home from "./components/DashBoard";
 import Departments from "./components/Departments";
 import LoadingSpinner from "./components/LoadingSpinner";
-import Events from "./components/Events";
+
+import EventDetails from "./components/EventDetails";
+import EventRegistration from './components/Events'
 import Forms from "./components/Forms";
 import CampusMap from "./components/CampusMap";
 import AIAssistant from "./components/AIAssistant";
@@ -98,8 +100,19 @@ function App() {
           />
           <Route
             path="/events"
+            exact
             render={() =>
-              user ? <Events isMobile={isMobile} /> : <Redirect to="/" />
+              user ? <EventRegistration isMobile={isMobile} /> : <Redirect to="/" />
+            }
+          />
+          <Route
+            path="/events/:id"
+            render={({ match }) =>
+              user ? (
+                <EventDetails eventId={match.params.id} isMobile={isMobile} />
+              ) : (
+                <Redirect to="/" />
+              )
             }
           />
           <Route
