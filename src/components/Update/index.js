@@ -3,7 +3,7 @@ import { useHistory } from "react-router-dom";
 import { db } from "../../firebase";
 import { collection, query, orderBy, onSnapshot } from "firebase/firestore";
 import { motion } from "framer-motion";
-import { FiChevronLeft, FiShare2, FiHeart, FiMessageCircle, FiMoreHorizontal } from "react-icons/fi";
+import { FiChevronLeft, FiShare2, FiHeart, FiMessageCircle, FiMoreHorizontal, FiVolume2, FiVolumeX } from "react-icons/fi";
 import Lottie from "lottie-react";
 import updatesAnim from "../assets/Ltz69bkEEA.json";
 import './index.css';
@@ -13,6 +13,7 @@ const UpdatesFeed = () => {
   const [updates, setUpdates] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [isMuted, setIsMuted] = useState(true);
   const videoRefs = useRef([]);
   const containerRef = useRef(null);
 
@@ -31,7 +32,6 @@ const UpdatesFeed = () => {
   }, []);
 
   useEffect(() => {
-    // Handle video play/pause when scrolling
     const handleScroll = () => {
       if (!containerRef.current) return;
       
@@ -64,12 +64,10 @@ const UpdatesFeed = () => {
   }, [updates.length, currentIndex]);
 
   const handleLike = (id) => {
-    // Implement like functionality
     console.log("Liked update:", id);
   };
 
   const handleShare = (update) => {
-    // Implement share functionality
     if (navigator.share) {
       navigator.share({
         title: update.title,
@@ -77,9 +75,18 @@ const UpdatesFeed = () => {
         url: window.location.href,
       }).catch(console.error);
     } else {
-      // Fallback for browsers that don't support Web Share API
       alert("Share this update: " + update.title);
     }
+  };
+
+  const toggleMute = () => {
+    setIsMuted(!isMuted);
+    // Update all video elements' muted state
+    videoRefs.current.forEach(video => {
+      if (video) {
+        video.muted = !isMuted;
+      }
+    });
   };
 
   if (isLoading) {
@@ -137,7 +144,7 @@ const UpdatesFeed = () => {
                   ref={el => videoRefs.current[index] = el}
                   src={update.videoUrl}
                   loop
-                  muted
+                  muted={isMuted}
                   playsInline
                   autoPlay={index === 0}
                   initial={{ opacity: 0 }}
@@ -184,6 +191,14 @@ const UpdatesFeed = () => {
               >
                 <FiShare2 size={24} />
                 <span>Share</span>
+              </button>
+
+              <button 
+                className="reel-action-btn" 
+                onClick={toggleMute}
+              >
+                {isMuted ? <FiVolumeX size={24} /> : <FiVolume2 size={24} />}
+                <span>{isMuted ? "Unmute" : "Mute"}</span>
               </button>
               
               <button className="reel-action-btn">
