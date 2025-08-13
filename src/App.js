@@ -11,14 +11,15 @@ import LoadingSpinner from "./components/LoadingSpinner";
 import UpdatesFeed from "./components/Update";
 import EventDetails from "./components/EventDetails";
 import EventRegistration from './components/Events'
-
+import FormsAdmin from "./components/Adminpanel/forms";
 import CampusMap from "./components/CampusMap";
-import AIAssistant from "./components/AIAssistant";
+
 import AdminHome from "./components/Adminpanel/home";
 import FacultyManagement from "./components/Adminpanel/Faculty";
 import EventsManagement from "./components/Adminpanel/Events";
 import FacultyList from "./components/facultyview";
 import UpdatesAdmin from "./components/Adminpanel/updateAdmin";
+import StudentFormsView from "./components/Forms";
 function App() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -128,9 +129,9 @@ function App() {
             }
           />
           <Route
-            path="/ai-help"
+            path="/forms"
             render={() =>
-              user ? <AIAssistant isMobile={isMobile} /> : <Redirect to="/" />
+              user ? <StudentFormsView isMobile={isMobile} /> : <Redirect to="/" />
             }
           />
 
@@ -171,6 +172,16 @@ function App() {
             render={() =>
               user?.isAdmin ? (
                 <UpdatesAdmin isMobile={isMobile} />
+              ) : (
+                <Redirect to="/home" />
+              )
+            }
+          />
+            <Route
+            path="/admin/forms"
+            render={() =>
+              user?.isAdmin ? (
+                <FormsAdmin isMobile={isMobile} />
               ) : (
                 <Redirect to="/home" />
               )

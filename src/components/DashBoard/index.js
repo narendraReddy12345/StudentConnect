@@ -1,33 +1,56 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./index.css";
 import FeatureCard from "../FeatureCard";
-import { useHistory } from "react-router-dom"; // Changed from useNavigate
+import { useHistory } from "react-router-dom";
 import { auth } from "../../firebase";
 import { signOut } from "firebase/auth";
 
+// Import animations
 import facultyAnim from "../assets/wckZq0erh9.json";
 import eventAnim from "../assets/fuGIip804B.json";
 import aiAnim from "../assets/94ye6EefMs.json";
 import formAnim from "../assets/KE3rP60rHv.json";
-import collegeMap from "../assets/t9sC61E7hk.json";
 import updatesAnim from "../assets/Ltz69bkEEA.json";
 import adminAnim from '../assets/IGeZmAD5Dp.json';
 
+// Import college images (you'll need to add these to your assets)
+import collegeImage1 from "../../assets/college2.jpg";
+import collegeImage2 from "../../assets/building-19-scaled.jpg";
+import collegeImage3 from "../../assets/1716807242kala.jpg";
+import collegeImage4 from "../../assets/images.jpg";
+
 const Home = ({ user, setUser }) => {
-  const history = useHistory(); // Changed from useNavigate
+  const history = useHistory();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [currentSlide, setCurrentSlide] = useState(0);
+
+  // College images array
+  const collegeImages = [
+    collegeImage1,
+    collegeImage2,
+    collegeImage3,
+    collegeImage4
+  ];
+
+  // Auto slide effect
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentSlide((prev) => (prev + 1) % collegeImages.length);
+    }, 3000); // Change slide every 3 seconds
+
+    return () => clearInterval(interval);
+  }, [collegeImages.length]);
 
   const handleLogout = async () => {
     setIsLoggingOut(true);
     try {
       await signOut(auth);
       
-      // Clear user state after successful logout
       if (typeof setUser === "function") {
         setUser(null);
       }
       
-      history.push("/"); // Changed from navigate("/")
+      history.push("/");
     } catch (error) {
       console.error("Logout error:", error);
       alert(error.message || "Logout failed. Please try again.");
@@ -57,12 +80,34 @@ const Home = ({ user, setUser }) => {
           </button>
         </div>
       </div>
+       {/* Image Slider Section */}
+      <div className="college-slider-container">
+        
+        <div className="slider-wrapper">
+          {collegeImages.map((image, index) => (
+            <div 
+              key={index}
+              className={`slide ${index === currentSlide ? 'active' : ''}`}
+              style={{ backgroundImage: `url(${image})` }}
+            />
+          ))}
+        </div>
+        <div className="slider-dots">
+          {collegeImages.map((_, index) => (
+            <button
+              key={index}
+              className={`dot ${index === currentSlide ? 'active' : ''}`}
+              onClick={() => setCurrentSlide(index)}
+            />
+          ))}
+        </div>
+      </div>
 
       <div className="features-grid">
         <FeatureCard
           title="Faculty 🔍"
           animationData={facultyAnim}
-          onClick={() => history.push("/departments")} // Changed from navigate
+          onClick={() => history.push("/departments")}
         />
         <FeatureCard
           title="Event Registrations"
@@ -80,11 +125,6 @@ const Home = ({ user, setUser }) => {
           onClick={() => history.push("/forms")}
         />
         <FeatureCard
-          title="Campus Map"
-          animationData={collegeMap}
-          onClick={() => history.push("/map")}
-        />
-        <FeatureCard
           title="AI Assistant"
           animationData={aiAnim}
           onClick={() => history.push("/ai-help")}
@@ -97,6 +137,8 @@ const Home = ({ user, setUser }) => {
           />
         )}
       </div>
+
+     
     </div>
   );
 };

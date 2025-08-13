@@ -7,7 +7,7 @@ import facultyAdminAnim from '../.././../assets/wckZq0erh9.json';
 import eventAdminAnim from '../.././../assets/fuGIip804B.json';
 import updatesAdminAnim from '../.././../assets/Ltz69bkEEA.json';
 import formsAdminAnim from '../.././../assets/KE3rP60rHv.json';
-import mapAdminAnim from '../.././../assets/t9sC61E7hk.json';
+
 
 const AdminHome = ({ user, setUser }) => {
   const history = useHistory();  // Changed from useNavigate
@@ -44,11 +44,7 @@ const AdminHome = ({ user, setUser }) => {
           animationData={formsAdminAnim}
           onClick={() => history.push("/admin/forms")}
         />
-        <FeatureCard
-          title="Manage Campus Map"
-          animationData={mapAdminAnim}
-          onClick={() => history.push("/admin/map")}
-        />
+       
       </div>
     </div>
   );

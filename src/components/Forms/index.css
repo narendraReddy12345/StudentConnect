@@ -1,0 +1,206 @@
+/* Student Forms View Specific Styles */
+.student-forms-container {
+  padding: 16px;
+  min-height: 100vh;
+  background: #f5f7fa;
+}
+
+.forms-header {
+  padding: 16px;
+  margin-bottom: 16px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.forms-header h1 {
+  font-size: 1.5rem;
+  color: #1a1a1a;
+  margin: 0;
+}
+
+.forms-list-container {
+  margin-top: 16px;
+}
+
+.form-card {
+  padding: 16px;
+  margin-bottom: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.form-card:hover {
+  transform: translateY(-2px);
+}
+
+.card-content {
+  display: flex;
+  gap: 16px;
+}
+
+.card-icon img {
+  border-radius: 8px;
+}
+
+.card-details {
+  flex: 1;
+}
+
+.card-details h3 {
+  margin: 0 0 8px 0;
+  font-size: 1.1rem;
+  color: #1a1a1a;
+}
+
+.card-description {
+  margin: 0 0 8px 0;
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.file-name {
+  font-size: 0.8rem;
+  color: #888;
+  word-break: break-all;
+}
+
+.download-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background: #f0f4ff;
+  border-radius: 50%;
+  color: #4f46e5;
+}
+
+/* Form Detail View */
+.form-detail-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 16px;
+}
+
+.form-detail-content {
+  width: 100%;
+  max-width: 500px;
+  padding: 24px;
+  background: white;
+  border-radius: 16px;
+}
+
+.detail-header {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 24px;
+  position: relative;
+}
+
+.form-title {
+  flex: 1;
+}
+
+.form-title h2 {
+  margin: 0;
+  font-size: 1.3rem;
+}
+
+.created-at {
+  margin: 4px 0 0 0;
+  font-size: 0.8rem;
+  color: #888;
+}
+
+.close-detail {
+  position: absolute;
+  top: 0;
+  right: 0;
+  background: none;
+  border: none;
+  color: #666;
+}
+
+.form-description h4,
+.form-file-info h4 {
+  margin-bottom: 8px;
+  color: #444;
+}
+
+.form-description p {
+  margin: 0;
+  color: #666;
+}
+
+.file-card {
+  display: flex;
+  gap: 12px;
+  padding: 12px;
+  background: #f9f9f9;
+  border-radius: 8px;
+  margin-top: 8px;
+}
+
+.file-details {
+  flex: 1;
+}
+
+.file-details .download-btn {
+  width: auto;
+  height: auto;
+  padding: 8px 16px;
+  border-radius: 8px;
+  margin-top: 8px;
+  display: inline-flex;
+  gap: 8px;
+}
+
+/* Loading and Empty States */
+.loading-state,
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 0;
+  text-align: center;
+}
+
+.empty-state h3 {
+  margin: 16px 0 8px 0;
+  color: #444;
+}
+
+.empty-state p {
+  margin: 0;
+  color: #888;
+}
+
+.spinner-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid rgba(79, 70, 229, 0.1);
+  border-radius: 50%;
+  border-top-color: #4f46e5;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
