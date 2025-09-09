@@ -153,8 +153,8 @@ const FacultyList = () => {
       </div>
 
       {/* Search Bar */}
-      <div className="search-bar">
-        <div className="search-wrapper">
+      <div className="search-bar1">
+        <div className="search-wrapper1">
           <FiSearch className="search-icon" />
           <input
             type="text"

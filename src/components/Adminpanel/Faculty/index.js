@@ -3,7 +3,7 @@ import { collection, getDocs, addDoc, deleteDoc, doc, updateDoc, query, where } 
 import { ref, onValue, off } from 'firebase/database';
 import { ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { db, storage, realtimeDb } from '../../../firebase'; // Import realtimeDb
-import { FiUpload, FiTrash2, FiUser, FiMail, FiPhone, FiHome, FiEdit, FiChevronDown, FiX, FiPlus, FiBook, FiUserCheck, FiUserX } from 'react-icons/fi';
+import { FiUpload, FiTrash2, FiUser, FiMail, FiPhone, FiHome, FiEdit, FiChevronDown, FiX, FiPlus, FiBook, FiUserX } from 'react-icons/fi';
 import './index.css';
 
 const FacultyManagement = () => {
@@ -324,26 +324,12 @@ const FacultyManagement = () => {
       {/* Current Faculty Status Card */}
       {currentFaculty && (
         <div className="current-faculty-card">
-          <div className="current-faculty-header">
-            <FiUserCheck className="present-icon" />
-            <h3>Currently in Cabin</h3>
-          </div>
+          
           <div className="current-faculty-details">
             {currentFaculty.name ? (
               <>
-                <div className="current-faculty-avatar">
-                  {currentFaculty.imageUrl ? (
-                    <img src={currentFaculty.imageUrl} alt={currentFaculty.name} />
-                  ) : (
-                    <FiUser size={32} />
-                  )}
-                </div>
-                <div className="current-faculty-info">
-                  <h4>{currentFaculty.name}</h4>
-                  <p>{departments[currentFaculty.department] || currentFaculty.department}</p>
-                  <p className="register-no">ID: {currentFaculty.registerNo}</p>
-                  {currentFaculty.cabin && <p>Cabin: {currentFaculty.cabin}</p>}
-                </div>
+                
+                
               </>
             ) : (
               <div className="unknown-faculty">

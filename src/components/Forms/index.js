@@ -77,6 +77,7 @@ const StudentFormsView = () => {
           <input
             type="text"
             placeholder="Search forms..."
+            className='search-bar1'
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />

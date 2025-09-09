@@ -107,19 +107,21 @@
 }
 
 /* Search Bar */
-.search-bar {
+.search-bar1 {
   padding: 12px 16px;
+  width: 85%;
   background-color: white;
   border-bottom: 1px solid #e5e7eb;
+  padding-left: 25px;
 }
 
-.search-wrapper {
+.search-wrapper1{
   position: relative;
   display: flex;
   align-items: center;
 }
 
-.search-wrapper input {
+.search-wrapper1 input {
   width: 100%;
   padding: 10px 16px 10px 40px;
   border-radius: 8px;
@@ -128,7 +130,7 @@
   background-color: #f9fafb;
 }
 
-.search-wrapper input:focus {
+.search-wrapper1 input:focus {
   outline: none;
   border-color: #4F46E5;
   background-color: white;
