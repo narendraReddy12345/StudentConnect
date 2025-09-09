@@ -1,473 +1,594 @@
-import React, { useState, useEffect } from "react";
-import { useHistory } from "react-router-dom";
-import { collection, getDocs, addDoc, doc, deleteDoc } from "firebase/firestore";
-import { db,storage} from "../../../firebase";
-import { ref
-  , uploadBytes, getDownloadURL } from "firebase/storage";
-import { 
-  FiCalendar, 
-  FiMapPin, 
-  FiUser, 
-  FiX, 
-  FiPlus, 
-  FiArrowLeft,
-  FiHome,
-  
-  FiVideo,
-  FiImage
-} from "react-icons/fi";
-import "./index.css";
+import React, { useState, useEffect, useCallback } from 'react';
+import { useHistory } from 'react-router-dom';
+import { storage, db } from '../../../firebase';
+import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
+import { collection, addDoc, getDocs, deleteDoc, doc, updateDoc } from 'firebase/firestore';
+import Lottie from 'lottie-react';
+import eventAnimation from '../../../assets/fuGIip804B.json';
+import './EventManagement.css';
 
-const Events = ({ isMobile }) => {
+// Import icons (you can use react-icons or custom SVGs)
+import { 
+  IoArrowBack, 
+  IoSearch, 
+  IoAdd, 
+  IoClose,
+  IoCalendar,
+  IoLocation,
+  IoPricetag,
+  IoCreate,
+  IoTrash
+} from 'react-icons/io5';
+
+const EventManagement = () => {
   const history = useHistory();
   const [events, setEvents] = useState([]);
+  const [filteredEvents, setFilteredEvents] = useState([]);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editingEventId, setEditingEventId] = useState(null);
+  const [isUploading, setIsUploading] = useState(false);
   const [showForm, setShowForm] = useState(false);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [uploading, setUploading] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [activeCategory, setActiveCategory] = useState('All');
   
-  // New event form state
+  const eventTypes = [
+    'Technical Workshop',
+    'Hackathon',
+    'Cultural Festival',
+    'Sports Event',
+    'Seminar',
+    'Conference',
+    'Webinar',
+    'Competition',
+    'Exhibition',
+    'Guest Lecture'
+  ];
+
   const [newEvent, setNewEvent] = useState({
-    title: "",
-    description: "",
-    date: "",
-    time: "",
-    location: "",
-    organizer: "",
-    maxParticipants: "",
-    registrationDeadline: "",
-    posterUrl: "",
-    videoUrl: ""
+    title: '',
+    type: '',
+    description: '',
+    date: '',
+    time: '',
+    venue: '',
+    image: null,
+    imagePreview: '',
+    video: null,
+    registrationLink: '',
+    isPaid: false,
+    paymentQR: null,
+    paymentQRPreview: '',
+    contactInfo: ''
   });
 
-  // Fetch events from Firestore
   useEffect(() => {
-    const fetchEvents = async () => {
-      try {
-        const eventsSnapshot = await getDocs(collection(db, "events"));
-        const eventsData = eventsSnapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data()
-        }));
-        setEvents(eventsData.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)));
-      } catch (err) {
-        console.error("Error fetching events:", err);
-        setError("Failed to load events. Please try again.");
-      } finally {
-        setLoading(false);
-      }
-    };
-    
     fetchEvents();
   }, []);
 
-  // Handle file upload
-  const handleFileUpload = async (file, type) => {
-    if (!file) return;
+  // Use useCallback to memoize the filterEvents function
+  const filterEvents = useCallback(() => {
+    let results = events;
     
+    // Filter by search query
+    if (searchQuery) {
+      results = results.filter(event => 
+        event.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        event.description.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+    }
+    
+    // Filter by category
+    if (activeCategory !== 'All') {
+      results = results.filter(event => event.type === activeCategory);
+    }
+    
+    setFilteredEvents(results);
+  }, [searchQuery, activeCategory, events]);
+
+  useEffect(() => {
+    filterEvents();
+  }, [filterEvents]); // Now filterEvents is stable because it's memoized with useCallback
+
+  const fetchEvents = async () => {
     try {
-      setUploading(true);
-      const storageRef = ref(storage, `event-media/${Date.now()}-${file.name}`);
-      await uploadBytes(storageRef, file);
-      const downloadURL = await getDownloadURL(storageRef);
-      
-      setNewEvent(prev => ({
-        ...prev,
-        [type === 'poster' ? 'posterUrl' : 'videoUrl']: downloadURL
-      }));
-      
-    } catch (err) {
-      console.error("Error uploading file:", err);
-      setError(`Failed to upload ${type}. Please try again.`);
-    } finally {
-      setUploading(false);
+      const querySnapshot = await getDocs(collection(db, 'events'));
+      const eventsData = [];
+      querySnapshot.forEach((doc) => {
+        eventsData.push({ id: doc.id, ...doc.data() });
+      });
+      // Sort events by date (newest first)
+      eventsData.sort((a, b) => new Date(b.date) - new Date(a.date));
+      setEvents(eventsData);
+    } catch (error) {
+      console.error("Error fetching events: ", error);
     }
   };
 
-  // Handle form input changes
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setNewEvent(prev => ({
-      ...prev,
-      [name]: value
-    }));
+  // Rest of the component remains the same...
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setNewEvent({
+          ...newEvent,
+          image: file,
+          imagePreview: reader.result
+        });
+      };
+      reader.readAsDataURL(file);
+    }
   };
 
-  // Handle form submission
+  const handleQRChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setNewEvent({
+          ...newEvent,
+          paymentQR: file,
+          paymentQRPreview: reader.result
+        });
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+    if (!newEvent.title || !newEvent.type || !newEvent.date) {
+      alert('Please fill in all required fields');
+      return;
+    }
+
+    setIsUploading(true);
     try {
-      // Basic validation
-      if (!newEvent.title || !newEvent.date || !newEvent.time) {
-        setError("Title, date, and time are required");
-        return;
+      let imageURL = '';
+      let qrURL = '';
+
+      // Upload image if exists
+      if (newEvent.image) {
+        const imageRef = ref(storage, `events/${Date.now()}_${newEvent.image.name}`);
+        await uploadBytes(imageRef, newEvent.image);
+        imageURL = await getDownloadURL(imageRef);
       }
 
-      // Add new event to Firestore
-      const docRef = await addDoc(collection(db, "events"), {
-        ...newEvent,
+      // Upload QR code if exists and event is paid
+      if (newEvent.isPaid && newEvent.paymentQR) {
+        const qrRef = ref(storage, `payments/${Date.now()}_${newEvent.paymentQR.name}`);
+        await uploadBytes(qrRef, newEvent.paymentQR);
+        qrURL = await getDownloadURL(qrRef);
+      }
+
+      // Prepare event data for Firestore
+      const eventData = {
+        title: newEvent.title,
+        type: newEvent.type,
+        description: newEvent.description,
+        date: newEvent.date,
+        time: newEvent.time,
+        venue: newEvent.venue,
+        registrationLink: newEvent.registrationLink,
+        isPaid: newEvent.isPaid,
+        contactInfo: newEvent.contactInfo,
         createdAt: new Date().toISOString(),
-        participants: []
-      });
+        imageURL: imageURL,
+        paymentQRURL: qrURL
+      };
 
-      // Update local state
-      setEvents([{ ...newEvent, id: docRef.id }, ...events]);
-      
-      // Reset form and hide it
-      setNewEvent({
-        title: "",
-        description: "",
-        date: "",
-        time: "",
-        location: "",
-        organizer: "",
-        maxParticipants: "",
-        registrationDeadline: "",
-        posterUrl: "",
-        videoUrl: ""
-      });
-      setShowForm(false);
-      setError(null);
-      
-    } catch (err) {
-      console.error("Error adding event:", err);
-      setError("Failed to add event. Please try again.");
+      if (isEditing && editingEventId) {
+        // Update existing event
+        await updateDoc(doc(db, 'events', editingEventId), eventData);
+        alert('Event updated successfully!');
+      } else {
+        // Add new event
+        await addDoc(collection(db, 'events'), eventData);
+        alert('Event added successfully!');
+      }
+
+      // Reset form and refresh events list
+      resetForm();
+      fetchEvents();
+    } catch (error) {
+      console.error("Error saving event: ", error);
+      alert('Error saving event. Please try again.');
+    } finally {
+      setIsUploading(false);
     }
   };
 
-  // Handle event deletion
-  const handleDelete = async (id) => {
-    if (window.confirm("Are you sure you want to delete this event?")) {
+  const handleEdit = (event) => {
+    setNewEvent({
+      title: event.title,
+      type: event.type,
+      description: event.description || '',
+      date: event.date,
+      time: event.time || '',
+      venue: event.venue || '',
+      image: null,
+      imagePreview: event.imageURL || '',
+      registrationLink: event.registrationLink || '',
+      isPaid: event.isPaid || false,
+      paymentQR: null,
+      paymentQRPreview: event.paymentQRURL || '',
+      contactInfo: event.contactInfo || ''
+    });
+    setIsEditing(true);
+    setEditingEventId(event.id);
+    setShowForm(true);
+  };
+
+  const handleDelete = async (eventId, imageURL, qrURL) => {
+    if (window.confirm('Are you sure you want to delete this event?')) {
       try {
-        await deleteDoc(doc(db, "events", id));
-        setEvents(events.filter(event => event.id !== id));
-      } catch (err) {
-        console.error("Error deleting event:", err);
-        setError("Failed to delete event. Please try again.");
+        // Delete from Firestore
+        await deleteDoc(doc(db, 'events', eventId));
+        
+        // Delete image from Storage if exists
+        if (imageURL) {
+          const imageRef = ref(storage, imageURL);
+          await deleteObject(imageRef);
+        }
+        
+        // Delete QR code from Storage if exists
+        if (qrURL) {
+          const qrRef = ref(storage, qrURL);
+          await deleteObject(qrRef);
+        }
+        
+        // Refresh events list
+        fetchEvents();
+        alert('Event deleted successfully!');
+      } catch (error) {
+        console.error("Error deleting event: ", error);
+        alert('Error deleting event. Please try again.');
       }
     }
   };
 
-  // Format date for display
+  const resetForm = () => {
+    setNewEvent({
+      title: '',
+      type: '',
+      description: '',
+      date: '',
+      time: '',
+      venue: '',
+      image: null,
+      imagePreview: '',
+      video: null,
+      registrationLink: '',
+      isPaid: false,
+      paymentQR: null,
+      paymentQRPreview: '',
+      contactInfo: ''
+    });
+    setIsEditing(false);
+    setEditingEventId(null);
+    setShowForm(false);
+  };
+
   const formatDate = (dateString) => {
     const options = { year: 'numeric', month: 'short', day: 'numeric' };
     return new Date(dateString).toLocaleDateString(undefined, options);
   };
 
-  if (loading) {
-    return (
-      <div className="loading-container">
-        <div className="spinner"></div>
-        <p>Loading events...</p>
-      </div>
-    );
-  }
+  const getEventIcon = (type) => {
+    switch(type) {
+      case 'Technical Workshop': return '🔧';
+      case 'Hackathon': return '💻';
+      case 'Cultural Festival': return '🎭';
+      case 'Sports Event': return '⚽';
+      case 'Seminar': return '📚';
+      case 'Conference': return '👔';
+      case 'Webinar': return '📹';
+      case 'Competition': return '🏆';
+      case 'Exhibition': return '🖼️';
+      case 'Guest Lecture': return '🎤';
+      default: return '📅';
+    }
+  };
 
   return (
-    <div className="events-container">
-      {/* Navigation Header */}
-      <header className="app-header">
-        <button 
-          className="nav-button"
-          onClick={() => history.goBack()}
-          aria-label="Go back"
-        >
-          <FiArrowLeft size={24} />
+    <div className="event-management-container">
+      {/* Header with back button and title */}
+      <div className="event-header">
+        <button onClick={() => history.goBack()} className="back-btn">
+          <IoArrowBack size={24} />
         </button>
-        <h1>Event Registrations</h1>
+        <h2>Event Management</h2>
         <button 
-          className="nav-button"
-          onClick={() => history.push("/")}
-          aria-label="Go home"
+          onClick={() => setShowForm(!showForm)} 
+          className={`add-event-btn ${showForm ? 'active' : ''}`}
         >
-          <FiHome size={24} />
+          {showForm ? <IoClose size={24} /> : <IoAdd size={24} />}
         </button>
-      </header>
+      </div>
 
-      {error && (
-        <div className="error-message">
-          {error}
-          <button onClick={() => setError(null)}>
-            <FiX size={16} />
-          </button>
+      {/* Search Section */}
+      <div className="search-section">
+        <div className="search-bar">
+          <IoSearch className="search-icon" />
+          <input
+            type="text"
+            placeholder="Search events..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+          {searchQuery && (
+            <button 
+              className="clear-search"
+              onClick={() => setSearchQuery('')}
+            >
+              <IoClose />
+            </button>
+          )}
         </div>
-      )}
+        
+        <div className="category-tabs">
+          <button 
+            className={activeCategory === 'All' ? 'active' : ''}
+            onClick={() => setActiveCategory('All')}
+          >
+            All
+          </button>
+          {eventTypes.map(type => (
+            <button
+              key={type}
+              className={activeCategory === type ? 'active' : ''}
+              onClick={() => setActiveCategory(type)}
+            >
+              {getEventIcon(type)} {type}
+            </button>
+          ))}
+        </div>
+      </div>
 
-      {/* Floating Action Button */}
-      <button 
-        className="fab"
-        onClick={() => setShowForm(true)}
-        aria-label="Add event"
-      >
-        <FiPlus size={24} />
-      </button>
-
-      {/* Add Event Form */}
       {showForm && (
-        <div className="event-form-overlay">
-          <div className="event-form-container">
-            <div className="form-header">
-              <h2>Create New Event</h2>
-              <button 
-                className="close-button"
-                onClick={() => {
-                  setShowForm(false);
-                  setError(null);
-                }}
-                aria-label="Close form"
-              >
-                <FiX size={20} />
-              </button>
-            </div>
-            
-            <form onSubmit={handleSubmit}>
+        <div className="event-form-section">
+          <div className="form-header">
+            <Lottie animationData={eventAnimation} loop={true} className="form-animation" />
+            <h3>{isEditing ? 'Edit Event' : 'Create New Event'}</h3>
+          </div>
+          
+          <form onSubmit={handleSubmit} className="event-form">
+            <div className="form-grid">
               <div className="form-group">
                 <label>Event Title *</label>
                 <input
                   type="text"
-                  name="title"
                   value={newEvent.title}
-                  onChange={handleInputChange}
+                  onChange={(e) => setNewEvent({...newEvent, title: e.target.value})}
                   required
-                  placeholder="Enter event title"
                 />
               </div>
               
               <div className="form-group">
-                <label>Description</label>
-                <textarea
-                  name="description"
-                  value={newEvent.description}
-                  onChange={handleInputChange}
-                  rows={3}
-                  placeholder="Enter event description"
-                />
-              </div>
-              
-              <div className="form-row">
-                <div className="form-group">
-                  <label>Date *</label>
-                  <input
-                    type="date"
-                    name="date"
-                    value={newEvent.date}
-                    onChange={handleInputChange}
-                    required
-                  />
-                </div>
-                
-                <div className="form-group">
-                  <label>Time *</label>
-                  <input
-                    type="time"
-                    name="time"
-                    value={newEvent.time}
-                    onChange={handleInputChange}
-                    required
-                  />
-                </div>
+                <label>Event Type *</label>
+                <select
+                  value={newEvent.type}
+                  onChange={(e) => setNewEvent({...newEvent, type: e.target.value})}
+                  required
+                >
+                  <option value="">Select Event Type</option>
+                  {eventTypes.map(type => (
+                    <option key={type} value={type}>{type}</option>
+                  ))}
+                </select>
               </div>
               
               <div className="form-group">
-                <label>Location</label>
+                <label>Date *</label>
+                <input
+                  type="date"
+                  value={newEvent.date}
+                  onChange={(e) => setNewEvent({...newEvent, date: e.target.value})}
+                  required
+                />
+              </div>
+              
+              <div className="form-group">
+                <label>Time</label>
+                <input
+                  type="time"
+                  value={newEvent.time}
+                  onChange={(e) => setNewEvent({...newEvent, time: e.target.value})}
+                />
+              </div>
+              
+              <div className="form-group">
+                <label>Venue</label>
                 <input
                   type="text"
-                  name="location"
-                  value={newEvent.location}
-                  onChange={handleInputChange}
-                  placeholder="Enter event location"
+                  value={newEvent.venue}
+                  onChange={(e) => setNewEvent({...newEvent, venue: e.target.value})}
                 />
               </div>
               
-              <div className="form-row">
-                <div className="form-group">
-                  <label>Organizer</label>
-                  <input
-                    type="text"
-                    name="organizer"
-                    value={newEvent.organizer}
-                    onChange={handleInputChange}
-                    placeholder="Enter organizer name"
-                  />
-                </div>
-                
-                <div className="form-group">
-                  <label>Max Participants</label>
-                  <input
-                    type="number"
-                    name="maxParticipants"
-                    value={newEvent.maxParticipants}
-                    onChange={handleInputChange}
-                    min="1"
-                    placeholder="0 for unlimited"
-                  />
-                </div>
-              </div>
-              
               <div className="form-group">
-                <label>Registration Deadline</label>
+                <label>Registration Link (Google Form)</label>
                 <input
-                  type="datetime-local"
-                  name="registrationDeadline"
-                  value={newEvent.registrationDeadline}
-                  onChange={handleInputChange}
+                  type="url"
+                  value={newEvent.registrationLink}
+                  onChange={(e) => setNewEvent({...newEvent, registrationLink: e.target.value})}
+                  placeholder="https://forms.google.com/..."
                 />
               </div>
               
-              {/* Poster Upload */}
-              <div className="form-group">
-                <label>Event Poster</label>
-                <div className="file-upload-container">
-                  <label className="file-upload-button">
-                    <FiImage size={18} />
-                    <span>{newEvent.posterUrl ? "Change Poster" : "Upload Poster"}</span>
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={(e) => handleFileUpload(e.target.files[0], 'poster')}
-                      hidden
-                    />
-                  </label>
-                  {uploading && newEvent.posterUrl && <span className="upload-status">Uploading...</span>}
-                  {newEvent.posterUrl && !uploading && (
-                    <div className="preview-thumbnail">
-                      <img src={newEvent.posterUrl} alt="Event poster preview" />
-                    </div>
-                  )}
-                </div>
+              <div className="form-group checkbox-group">
+                <label>
+                  <input
+                    type="checkbox"
+                    checked={newEvent.isPaid}
+                    onChange={(e) => setNewEvent({...newEvent, isPaid: e.target.checked})}
+                  />
+                  Paid Event
+                </label>
               </div>
               
-              {/* Video Upload */}
-              <div className="form-group">
-                <label>Event Video</label>
-                <div className="file-upload-container">
-                  <label className="file-upload-button">
-                    <FiVideo size={18} />
-                    <span>{newEvent.videoUrl ? "Change Video" : "Upload Video"}</span>
-                    <input
-                      type="file"
-                      accept="video/*"
-                      onChange={(e) => handleFileUpload(e.target.files[0], 'video')}
-                      hidden
-                    />
-                  </label>
-                  {uploading && newEvent.videoUrl && <span className="upload-status">Uploading...</span>}
-                  {newEvent.videoUrl && !uploading && (
-                    <div className="preview-thumbnail">
-                      <video controls>
-                        <source src={newEvent.videoUrl} type="video/mp4" />
-                        Your browser does not support the video tag.
-                      </video>
+              {newEvent.isPaid && (
+                <div className="form-group">
+                  <label>Payment QR Code</label>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleQRChange}
+                  />
+                  {newEvent.paymentQRPreview && (
+                    <div className="image-preview">
+                      <img src={newEvent.paymentQRPreview} alt="QR Code Preview" />
                     </div>
                   )}
-                </div>
-              </div>
-              
-              <div className="form-actions">
-                <button
-                  type="button"
-                  className="secondary-button"
-                  onClick={() => setShowForm(false)}
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="primary-button"
-                  disabled={uploading}
-                >
-                  {uploading ? "Creating..." : "Create Event"}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* Events List */}
-      <div className="events-list">
-        {events.length === 0 ? (
-          <div className="empty-state">
-            <img 
-              src="https://cdn-icons-png.flaticon.com/512/4076/4076478.png" 
-              alt="No events"
-              className="empty-image"
-            />
-            <h3>No Events Found</h3>
-            <p>Create your first event to get started</p>
-            <button 
-              className="primary-button"
-              onClick={() => setShowForm(true)}
-            >
-              Create Event
-            </button>
-          </div>
-        ) : (
-          events.map(event => (
-            <div key={event.id} className="event-card">
-              {event.posterUrl && (
-                <div className="event-poster">
-                  <img src={event.posterUrl} alt={`${event.title} poster`} />
                 </div>
               )}
               
-              <div className="event-content">
-                <div className="event-header">
-                  <h3>{event.title}</h3>
-                  <button
-                    className="delete-button"
-                    onClick={() => handleDelete(event.id)}
-                    aria-label="Delete event"
-                  >
-                    <FiX size={18} />
-                  </button>
-                </div>
-                
-                <p className="event-description">{event.description}</p>
-                
-                <div className="event-details">
-                  <div className="detail-item">
-                    <FiCalendar className="icon" />
-                    <span>{formatDate(event.date)} at {event.time}</span>
+              <div className="form-group full-width">
+                <label>Description</label>
+                <textarea
+                  value={newEvent.description}
+                  onChange={(e) => setNewEvent({...newEvent, description: e.target.value})}
+                  rows="4"
+                />
+              </div>
+              
+              <div className="form-group">
+                <label>Event Poster/Image</label>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageChange}
+                />
+                {newEvent.imagePreview && (
+                  <div className="image-preview">
+                    <img src={newEvent.imagePreview} alt="Event Preview" />
                   </div>
-                  
-                  {event.location && (
-                    <div className="detail-item">
-                      <FiMapPin className="icon" />
-                      <span>{event.location}</span>
-                    </div>
-                  )}
-                  
-                  {event.organizer && (
-                    <div className="detail-item">
-                      <FiUser className="icon" />
-                      <span>Organizer: {event.organizer}</span>
-                    </div>
-                  )}
-                </div>
-                
-                <div className="event-actions">
-                  <button
-                    className="view-button"
-                    onClick={() => history.push(`/events/${event.id}`)}
-                  >
-                    View Details
-                  </button>
-                  <button
-                    className="register-button"
-                    onClick={() => history.push(`/events/${event.id}/register`)}
-                  >
-                    Register
-                  </button>
-                </div>
+                )}
+              </div>
+              
+              <div className="form-group">
+                <label>Contact Information</label>
+                <input
+                  type="text"
+                  value={newEvent.contactInfo}
+                  onChange={(e) => setNewEvent({...newEvent, contactInfo: e.target.value})}
+                  placeholder="Email or phone number for queries"
+                />
               </div>
             </div>
-          ))
+            
+            <div className="form-actions">
+              <button type="button" onClick={resetForm} className="cancel-btn">
+                Cancel
+              </button>
+              <button type="submit" disabled={isUploading} className="submit-btn">
+                {isUploading ? 'Saving...' : (isEditing ? 'Update Event' : 'Create Event')}
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
+
+      <div className="events-list-section">
+        <div className="section-header">
+          <h3>Events ({filteredEvents.length})</h3>
+          <div className="filter-info">
+            {activeCategory !== 'All' && (
+              <span className="active-filter">
+                 {activeCategory}
+                <button onClick={() => setActiveCategory('All')}>
+                  <IoClose />
+                </button>
+              </span>
+            )}
+          </div>
+        </div>
+        
+        {filteredEvents.length === 0 ? (
+          <div className="empty-state">
+            <Lottie animationData={eventAnimation} loop={true} className="empty-animation" />
+            <p>
+              {searchQuery || activeCategory !== 'All' 
+                ? 'No events match your search criteria' 
+                : 'No events found. Create your first event!'}
+            </p>
+            {(searchQuery || activeCategory !== 'All') && (
+              <button 
+                className="clear-filters-btn"
+                onClick={() => {
+                  setSearchQuery('');
+                  setActiveCategory('All');
+                }}
+              >
+                Clear Filters
+              </button>
+            )}
+          </div>
+        ) : (
+          <div className="events-grid">
+            {filteredEvents.map(event => (
+              <div key={event.id} className="event-card">
+               
+                <div className="event-content">
+                  <div className="event-header">
+                    <h4>{event.title}</h4>
+                  </div>
+                  
+                  <div className="event-details">
+                    <div className="event-meta">
+                      <div className="meta-item">
+                        <IoCalendar className="meta-icon" />
+                        <span>{formatDate(event.date)}{event.time && ` • ${event.time}`}</span>
+                      </div>
+                      
+                      {event.venue && (
+                        <div className="meta-item">
+                          <IoLocation className="meta-icon" />
+                          <span>{event.venue}</span>
+                        </div>
+                      )}
+                      
+                      <div className="meta-item">
+                        <IoPricetag className="meta-icon" />
+                        <span className={event.isPaid ? 'paid-badge' : 'free-badge'}>
+                          {event.isPaid ? 'Paid Event' : 'Free Event'}
+                        </span>
+                      </div>
+                    </div>
+                    
+                    {event.description && (
+                      <p className="event-description">
+                        {event.description.length > 100 
+                          ? `${event.description.substring(0, 100)}...` 
+                          : event.description}
+                      </p>
+                    )}
+                  </div>
+                  
+                  <div className="event-actions">
+                    <button 
+                      onClick={() => handleEdit(event)}
+                      className="edit-btn"
+                    >
+                      <IoCreate size={18} />
+                      Edit
+                    </button>
+                    <button 
+                      onClick={() => handleDelete(event.id, event.imageURL, event.paymentQRURL)}
+                      className="delete-btn"
+                    >
+                      <IoTrash size={18} />
+                      Delete
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
         )}
       </div>
     </div>
   );
 };
 
-export default Events;
+export default EventManagement;

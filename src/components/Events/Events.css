@@ -1,0 +1,679 @@
+/* CampusEvents.css */
+
+.eventHorizon {
+  padding: 16px;
+  max-width: 100%;
+  overflow-x: hidden;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  min-height: 100vh;
+}
+
+.navigateBackContainer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.orbitBackButton {
+  background: rgba(255, 255, 255, 0.9);
+  border: none;
+  border-radius: 50%;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(10px);
+  z-index: 10;
+}
+
+.stellarTitle {
+  font-size: 28px;
+  font-weight: 800;
+  background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin: 0;
+}
+
+.headerSpacer {
+  width: 44px;
+}
+
+/* Search Section */
+.cosmosSearch {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.nebulaSearchBar {
+  position: relative;
+  flex: 1;
+}
+
+.searchPulsar {
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #7f8c8d;
+  z-index: 2;
+}
+
+.searchQuasar {
+  width: 100%;
+  padding: 14px 16px 14px 44px;
+  border: none;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  font-size: 16px;
+  backdrop-filter: blur(10px);
+}
+
+.clearSupernova {
+  position: absolute;
+  right: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: #7f8c8d;
+  font-size: 20px;
+  cursor: pointer;
+}
+
+.filterComet {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 12px 16px;
+  border: none;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  font-size: 14px;
+  font-weight: 600;
+  color: #3498db;
+  backdrop-filter: blur(10px);
+}
+
+/* Filter Section */
+.galaxyFilters {
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 20px;
+  padding: 20px;
+  margin-bottom: 24px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  backdrop-filter: blur(10px);
+}
+
+.filterCluster {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.filterNebula {
+  font-size: 16px;
+  font-weight: 700;
+  color: #2c3e50;
+}
+
+.constellationOptions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.starOption, .activeStar {
+  padding: 10px 16px;
+  border: none;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.starOption {
+  background: rgba(52, 152, 219, 0.1);
+  color: #3498db;
+}
+
+.activeStar {
+  background: #3498db;
+  color: white;
+  box-shadow: 0 4px 12px rgba(52, 152, 219, 0.4);
+}
+
+/* Events List */
+.eventUniverse {
+  margin-bottom: 40px;
+}
+
+.cosmicHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.solarTitle {
+  font-size: 22px;
+  font-weight: 700;
+  color: #2c3e50;
+  margin: 0;
+}
+
+.eventMeteorCount {
+  background: #3498db;
+  color: white;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.eventGalaxy {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.eventPlanet {
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 24px;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+}
+
+.eventPlanet:active {
+  transform: scale(0.98);
+}
+
+.planetImage {
+  position: relative;
+  height: 200px;
+  overflow: hidden;
+}
+/* Payment Step Styles */
+.paymentStep {
+  padding: 20px;
+}
+
+.paymentDetails {
+  margin: 20px 0;
+}
+
+.paymentSummary, .studentInfo {
+  background: #f8f9fa;
+  padding: 15px;
+  border-radius: 8px;
+  margin-bottom: 15px;
+}
+
+.paymentSummary h4, .studentInfo h4 {
+  margin-top: 0;
+  color: #2c3e50;
+}
+
+.summaryItem, .summaryTotal {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.summaryItem {
+  color: #7f8c8d;
+  font-size: 14px;
+}
+
+.summaryTotal {
+  font-weight: 600;
+  color: #2c3e50;
+  border-top: 1px solid #e2e8f0;
+  padding-top: 12px;
+  margin-top: 12px;
+}
+
+.studentInfo p {
+  margin: 8px 0;
+  color: #34495e;
+}
+
+.paymentActions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 15px;
+}
+
+.backButton {
+  background: none;
+  border: none;
+  color: #3498db;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.closeButton {
+  background: #3498db;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 20px;
+}
+
+.planetImage img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.eventOrbitBadge {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 700;
+  background: rgba(255, 255, 255, 0.9);
+  color: #3498db;
+  backdrop-filter: blur(10px);
+}
+
+.planetContent {
+  padding: 20px;
+}
+
+.planetType {
+  font-size: 14px;
+  color: #7f8c8d;
+  margin-bottom: 8px;
+}
+
+.planetTitle {
+  font-size: 20px;
+  font-weight: 700;
+  margin-bottom: 16px;
+  color: #2c3e50;
+  line-height: 1.3;
+}
+
+.planetMetadata {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.moonData {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  color: #34495e;
+}
+
+.moonIcon {
+  color: #7f8c8d;
+  flex-shrink: 0;
+}
+
+.paidCrater, .freeCrater {
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.paidCrater {
+  background: #ffeaa7;
+  color: #d35400;
+}
+
+.freeCrater {
+  background: #d5f5e3;
+  color: #27ae60;
+}
+
+.viewOrbitButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 14px;
+  border: none;
+  border-radius: 16px;
+  background: rgba(52, 152, 219, 0.1);
+  color: #3498db;
+  font-weight: 700;
+  transition: all 0.3s ease;
+}
+
+.viewOrbitButton:active {
+  background: rgba(52, 152, 219, 0.2);
+}
+
+/* Empty State */
+.voidState {
+  text-align: center;
+  padding: 40px 20px;
+  background: rgba(255, 255, 255, 0.7);
+  border-radius: 24px;
+  backdrop-filter: blur(10px);
+}
+
+.voidAnimation {
+  width: 150px;
+  height: 150px;
+  margin: 0 auto 16px;
+}
+
+.emptyNebula {
+  color: #7f8c8d;
+  margin-bottom: 20px;
+  font-size: 16px;
+}
+
+.resetOrbitButton {
+  padding: 12px 24px;
+  border: none;
+  border-radius: 20px;
+  background: #3498db;
+  color: white;
+  font-weight: 700;
+  box-shadow: 0 4px 12px rgba(52, 152, 219, 0.4);
+}
+
+/* Modal Styles */
+.modalBlackHole {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 16px;
+  backdrop-filter: blur(5px);
+}
+
+.eventSingularity, .registrationSingularity {
+  background: white;
+  border-radius: 24px;
+  max-width: 500px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  position: relative;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+}
+
+.singularityClose {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  z-index: 10;
+  background: rgba(0, 0, 0, 0.7);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+}
+
+.singularityImage {
+  position: relative;
+  height: 220px;
+  overflow: hidden;
+}
+
+.singularityImage img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.singularityTime {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 700;
+  background: rgba(255, 255, 255, 0.9);
+  color: #3498db;
+}
+
+.singularityContent {
+  padding: 24px;
+}
+
+.singularityType {
+  font-size: 14px;
+  color: #7f8c8d;
+  margin-bottom: 8px;
+}
+
+.singularityContent h2 {
+  font-size: 24px;
+  margin-bottom: 20px;
+  color: #2c3e50;
+  line-height: 1.3;
+}
+
+.singularityMetadata {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  margin-bottom: 24px;
+}
+
+.singularityData {
+  display: flex;
+  gap: 16px;
+}
+
+.dataPulsar {
+  color: #7f8c8d;
+  font-size: 20px;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.dataNebula {
+  font-size: 12px;
+  color: #7f8c8d;
+  margin-bottom: 4px;
+}
+
+.dataQuasar {
+  font-size: 16px;
+  color: #2c3e50;
+  font-weight: 500;
+}
+
+.singularityDescription {
+  margin-bottom: 24px;
+}
+
+.singularityDescription h3 {
+  font-size: 18px;
+  margin-bottom: 12px;
+  color: #2c3e50;
+}
+
+.singularityDescription p {
+  color: #34495e;
+  line-height: 1.6;
+}
+
+.singularityActions {
+  margin-top: 24px;
+}
+
+.registerNova {
+  width: 100%;
+  padding: 18px;
+  border: none;
+  border-radius: 16px;
+  background: #3498db;
+  color: white;
+  font-size: 16px;
+  font-weight: 700;
+  box-shadow: 0 4px 12px rgba(52, 152, 219, 0.4);
+  transition: all 0.3s ease;
+  text-align: center;
+  text-decoration: none;
+  display: block;
+}
+
+.registerNova:active {
+  background: #2980b9;
+  transform: translateY(2px);
+}
+
+/* Registration Modal */
+.registrationSingularity {
+  padding: 24px;
+}
+
+.singularityHeader {
+  margin-bottom: 24px;
+  text-align: center;
+}
+
+.singularityHeader h2 {
+  font-size: 24px;
+  margin-bottom: 8px;
+  color: #2c3e50;
+}
+
+.singularityHeader p {
+  color: #7f8c8d;
+}
+
+.registrationOrbit {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.orbitGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.orbitGroup label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #2c3e50;
+}
+
+.orbitGroup input {
+  padding: 16px;
+  border: 1px solid #ddd;
+  border-radius: 12px;
+  font-size: 16px;
+  background: #f8f9fa;
+}
+
+.paymentAstral {
+  background: #f8f9fa;
+  padding: 20px;
+  border-radius: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 16px;
+}
+
+.astralIcon {
+  color: #f39c12;
+  font-size: 28px;
+}
+
+.paymentAstral p {
+  font-size: 14px;
+  color: #34495e;
+  line-height: 1.5;
+}
+
+.astralQR {
+  width: 160px;
+  height: 160px;
+  object-fit: contain;
+}
+
+.submitOrbitButton {
+  padding: 18px;
+  border: none;
+  border-radius: 16px;
+  background: #27ae60;
+  color: white;
+  font-size: 16px;
+  font-weight: 700;
+  margin-top: 8px;
+  box-shadow: 0 4px 12px rgba(39, 174, 96, 0.4);
+}
+
+.submitOrbitButton:disabled {
+  background: #bdc3c7;
+  box-shadow: none;
+}
+
+.registrationSupernova {
+  padding: 40px 20px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.supernovaIcon {
+  color: #27ae60;
+  font-size: 52px;
+}
+
+.registrationSupernova h2 {
+  color: #2c3e50;
+}
+
+.registrationSupernova p {
+  color: #7f8c8d;
+}
+
+/* Responsive adjustments */
+@media (min-width: 768px) {
+  .eventHorizon {
+    padding: 24px;
+  }
+  
+  .eventGalaxy {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 24px;
+  }
+}

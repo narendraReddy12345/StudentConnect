@@ -1,0 +1,20 @@
+.payment-button {
+  background-color: #3498db;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.payment-button:hover:not(:disabled) {
+  background-color: #2980b9;
+}
+
+.payment-button:disabled {
+  background-color: #bdc3c7;
+  cursor: not-allowed;
+}

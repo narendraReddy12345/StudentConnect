@@ -1,289 +1,621 @@
-import React, { useState, useEffect } from "react";
-import { useHistory } from "react-router-dom";
-import { collection, getDocs } from "firebase/firestore";
-import { db } from "../../firebase";
-import { FiSearch, FiArrowLeft, FiArrowRight, FiCalendar, FiMapPin, FiClock } from "react-icons/fi";
-import Lottie from "lottie-react";
-import eventAnim from "../assets/fuGIip804B.json";
-import './index.css';
+import React, { useState, useEffect, useCallback } from 'react';
+import { useHistory } from 'react-router-dom';
+import { db } from '../../firebase';
+import { collection, getDocs, addDoc, serverTimestamp, updateDoc, doc } from 'firebase/firestore';
+import Lottie from 'lottie-react';
+import eventAnimation from '../../assets/fuGIip804B.json';
+import PaymentButton from '../../components/PaymentButton'; // Import the PaymentButton component
+import './Events.css';
 
-const EventRegistration = () => {
+// Import icons
+import { 
+  IoSearch, 
+  IoCalendar,
+  IoLocation,
+  IoPricetag,
+  IoClose,
+  IoArrowForward,
+  IoPeople,
+  IoCheckmarkCircle,
+  IoAlertCircle,
+  IoArrowBack,
+  IoFilter
+} from 'react-icons/io5';
+
+const CampusEvents = () => {
   const history = useHistory();
   const [events, setEvents] = useState([]);
   const [filteredEvents, setFilteredEvents] = useState([]);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [loading, setLoading] = useState(true);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [activeCategory, setActiveCategory] = useState("all");
-  const eventsPerPage = 6;
+  const [selectedEvent, setSelectedEvent] = useState(null);
+  const [showEventModal, setShowEventModal] = useState(false);
+  const [showRegistrationModal, setShowRegistrationModal] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [activeCategory, setActiveCategory] = useState('All');
+  const [setRegistrationSuccess] = useState(false);
+  const [isRegistering, setIsRegistering] = useState(false);
+  const [showFilters, setShowFilters] = useState(false);
+  const [registrationStep, setRegistrationStep] = useState('form'); // 'form', 'payment', 'complete'
+  const [currentRegistration, setCurrentRegistration] = useState(null);
+  const [registrationData, setRegistrationData] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    studentId: '',
+    department: ''
+  });
 
-  // Categories for filtering
-  const categories = [
-    { id: "all", name: "All Events" },
-    { id: "upcoming", name: "Upcoming" },
-    { id: "music", name: "Music" },
-    { id: "sports", name: "Sports" },
-    { id: "tech", name: "Tech" },
-    { id: "art", name: "Art" },
+  const eventTypes = [
+    'Technical Workshop',
+    'Hackathon',
+    'Cultural Festival',
+    'Sports Event',
+    'Seminar',
+    'Conference',
+    'Webinar',
+    'Competition',
+    'Exhibition',
+    'Guest Lecture'
   ];
 
-  // Fetch events from Firestore
   useEffect(() => {
-    const fetchEvents = async () => {
-      try {
-        const eventsSnapshot = await getDocs(collection(db, "events"));
-        const eventsData = eventsSnapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data()
-        }));
-        setEvents(eventsData);
-        setFilteredEvents(eventsData);
-      } catch (error) {
-        console.error("Error fetching events:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchEvents();
   }, []);
 
-  // Filter events based on search term and category
-  useEffect(() => {
-    let filtered = events;
+  const fetchEvents = async () => {
+    try {
+      const querySnapshot = await getDocs(collection(db, 'events'));
+      const eventsData = [];
+      querySnapshot.forEach((doc) => {
+        eventsData.push({ id: doc.id, ...doc.data() });
+      });
+      // Sort events by date (newest first)
+      eventsData.sort((a, b) => new Date(a.date) - new Date(b.date));
+      setEvents(eventsData);
+      setFilteredEvents(eventsData);
+    } catch (error) {
+      console.error("Error fetching events: ", error);
+    }
+  };
+
+  const filterEvents = useCallback(() => {
+    let results = events;
     
-    // Apply search filter
-    if (searchTerm) {
-      filtered = filtered.filter(event =>
-        event.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        event.location.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        event.category?.toLowerCase().includes(searchTerm.toLowerCase())
+    // Filter by search query
+    if (searchQuery) {
+      results = results.filter(event => 
+        event.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        event.description.toLowerCase().includes(searchQuery.toLowerCase())
       );
     }
     
-    // Apply category filter
-    if (activeCategory !== "all") {
-      if (activeCategory === "upcoming") {
-        filtered = filtered.filter(event => 
-          new Date(event.date) > new Date()
-        );
-      } else {
-        filtered = filtered.filter(event => 
-          event.category?.toLowerCase() === activeCategory
-        );
-      }
+    // Filter by category
+    if (activeCategory !== 'All') {
+      results = results.filter(event => event.type === activeCategory);
     }
     
-    setFilteredEvents(filtered);
-    setCurrentPage(1); // Reset to first page when filtering
-  }, [searchTerm, events, activeCategory]);
+    // Only show upcoming events
+    results = results.filter(event => isEventUpcoming(event.date));
+    
+    setFilteredEvents(results);
+  }, [searchQuery, activeCategory, events]);
 
-  // Pagination logic
-  const indexOfLastEvent = currentPage * eventsPerPage;
-  const indexOfFirstEvent = indexOfLastEvent - eventsPerPage;
-  const currentEvents = filteredEvents.slice(indexOfFirstEvent, indexOfLastEvent);
-  const totalPages = Math.ceil(filteredEvents.length / eventsPerPage);
+  useEffect(() => {
+    filterEvents();
+  }, [filterEvents]);
+
+  const handleEventClick = (event) => {
+    setSelectedEvent(event);
+    setShowEventModal(true);
+  };
+
+  const handleRegisterClick = () => {
+    setShowRegistrationModal(true);
+    setShowEventModal(false);
+    setRegistrationStep('form');
+    setRegistrationData({
+      name: '',
+      email: '',
+      phone: '',
+      studentId: '',
+      department: ''
+    });
+  };
+
+  const handleRegistrationChange = (e) => {
+    setRegistrationData({
+      ...registrationData,
+      [e.target.name]: e.target.value
+    });
+  };
+
+  const handleRegistrationSubmit = async (e) => {
+    e.preventDefault();
+    setIsRegistering(true);
+    
+    try {
+      // Create registration record in Firebase
+      const registrationRef = await addDoc(collection(db, 'registrations'), {
+        eventId: selectedEvent.id,
+        eventTitle: selectedEvent.title,
+        ...registrationData,
+        paymentStatus: selectedEvent.isPaid ? 'pending' : 'not_required',
+        registeredAt: serverTimestamp()
+      });
+
+      // If event is paid, move to payment step
+      if (selectedEvent.isPaid) {
+        setRegistrationStep('payment');
+        setCurrentRegistration({
+          id: registrationRef.id,
+          ...registrationData
+        });
+      } else {
+        // Free event - registration complete
+        setRegistrationStep('complete');
+        setRegistrationSuccess(true);
+      }
+    } catch (error) {
+      console.error("Error registering for event: ", error);
+      alert('Registration failed. Please try again.');
+    } finally {
+      setIsRegistering(false);
+    }
+  };
+
+  const handlePaymentSuccess = async (paymentResponse) => {
+    try {
+      // Update registration with payment details
+      await updateDoc(doc(db, 'registrations', currentRegistration.id), {
+        paymentStatus: 'paid',
+        paymentId: paymentResponse.razorpay_payment_id,
+        paymentDate: new Date()
+      });
+      
+      // Create payment record
+      await addDoc(collection(db, 'payments'), {
+        eventId: selectedEvent.id,
+        eventTitle: selectedEvent.title,
+        studentId: currentRegistration.studentId,
+        studentName: currentRegistration.name,
+        registrationId: currentRegistration.id,
+        amount: selectedEvent.price || 0,
+        paymentId: paymentResponse.razorpay_payment_id,
+        status: 'completed',
+        createdAt: new Date()
+      });
+      
+      setRegistrationStep('complete');
+      setRegistrationSuccess(true);
+    } catch (error) {
+      console.error('Error updating payment status:', error);
+      alert('Payment successful but registration update failed. Please contact support.');
+    }
+  };
+
+  const handlePaymentError = (errorMessage) => {
+    alert(`Payment error: ${errorMessage}`);
+  };
 
   const formatDate = (dateString) => {
-    const options = { day: 'numeric', month: 'short', year: 'numeric' };
+    const options = { year: 'numeric', month: 'short', day: 'numeric' };
     return new Date(dateString).toLocaleDateString(undefined, options);
   };
 
-  const formatTime = (timeString) => {
-    if (!timeString) return "";
-    const [hours, minutes] = timeString.split(':');
-    const hour = parseInt(hours, 10);
-    return `${hour > 12 ? hour - 12 : hour}:${minutes} ${hour >= 12 ? 'PM' : 'AM'}`;
+  const getEventIcon = (type) => {
+    switch(type) {
+      case 'Technical Workshop': return '🔧';
+      case 'Hackathon': return '💻';
+      case 'Cultural Festival': return '🎭';
+      case 'Sports Event': return '⚽';
+      case 'Seminar': return '📚';
+      case 'Conference': return '👔';
+      case 'Webinar': return '📹';
+      case 'Competition': return '🏆';
+      case 'Exhibition': return '🖼️';
+      case 'Guest Lecture': return '🎤';
+      default: return '📅';
+    }
   };
 
-  if (loading) {
-    return (
-      <div className="loading-container">
-        <Lottie 
-          animationData={eventAnim} 
-          loop={true} 
-          style={{ height: 200 }} 
-        />
-        <p className="loading-text">Discovering amazing events...</p>
-        <div className="loading-progress"></div>
-      </div>
-    );
-  }
+  const isEventUpcoming = (eventDate) => {
+    return new Date(eventDate) >= new Date();
+  };
+
+  const getDaysUntilEvent = (eventDate) => {
+    const today = new Date();
+    const eventDay = new Date(eventDate);
+    const diffTime = eventDay - today;
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    
+    if (diffDays === 0) return 'Today';
+    if (diffDays === 1) return 'Tomorrow';
+    if (diffDays < 7) return `In ${diffDays} days`;
+    if (diffDays < 30) return `In ${Math.ceil(diffDays / 7)} weeks`;
+    return `In ${Math.ceil(diffDays / 30)} months`;
+  };
 
   return (
-    <div className="event-registration-container">
-      {/* Header with back button and search */}
-      <header className="event-header">
-        <button 
-          className="back-button"
-          onClick={() => history.goBack()}
-          aria-label="Go back"
-        >
-          <FiArrowLeft size={24} />
+    <div className="eventHorizon">
+      {/* Header with back button */}
+      <div className="navigateBackContainer">
+        <button onClick={() => history.goBack()} className="orbitBackButton">
+          <IoArrowBack size={24} />
         </button>
-        
-        <div className="header-content">
-          <h1 className="header-title">Event Registration</h1>
-          
-        </div>
-      </header>
+        <h1 className="stellarTitle">Campus Events</h1>
+        <div className="headerSpacer"></div>
+      </div>
 
-      {/* Search bar with floating effect */}
-      <div className="search-wrapper">
-        <div className="search-container">
-          <FiSearch className="search-icon" />
+      {/* Search Section */}
+      <div className="cosmosSearch">
+        <div className="nebulaSearchBar">
+          <IoSearch className="searchPulsar" />
           <input
             type="text"
-            placeholder="Search events by name, location or category..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="search-input"
+            placeholder="Search events..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="searchQuasar"
           />
-          {searchTerm && (
+          {searchQuery && (
             <button 
-              className="clear-search"
-              onClick={() => setSearchTerm("")}
+              className="clearSupernova"
+              onClick={() => setSearchQuery('')}
             >
-              &times;
+              <IoClose />
             </button>
           )}
         </div>
+        
+        <button 
+          className="filterComet"
+          onClick={() => setShowFilters(!showFilters)}
+        >
+          <IoFilter />
+          Filter
+        </button>
       </div>
 
-      {/* Category chips */}
-      <div className="category-scroller">
-        <div className="category-container">
-          {categories.map(category => (
-            <button
-              key={category.id}
-              className={`category-chip ${activeCategory === category.id ? 'active' : ''}`}
-              onClick={() => setActiveCategory(category.id)}
-            >
-              {category.name}
-            </button>
-          ))}
+      {/* Filter Section */}
+      {showFilters && (
+        <div className="galaxyFilters">
+          <div className="filterCluster">
+            <span className="filterNebula">Event Types</span>
+            <div className="constellationOptions">
+              <button 
+                className={activeCategory === 'All' ? 'activeStar' : 'starOption'}
+                onClick={() => setActiveCategory('All')}
+              >
+                All Events
+              </button>
+              {eventTypes.map(type => (
+                <button
+                  key={type}
+                  className={activeCategory === type ? 'activeStar' : 'starOption'}
+                  onClick={() => setActiveCategory(type)}
+                >
+                  {getEventIcon(type)} {type}
+                </button>
+              ))}
+            </div>
+          </div>
         </div>
-      </div>
+      )}
 
-      {/* Main content */}
-      <main className="events-content">
+      {/* Events List */}
+      <div className="eventUniverse">
+        <div className="cosmicHeader">
+          <h2 className="solarTitle">Upcoming Events</h2>
+          <span className="eventMeteorCount">{filteredEvents.length}</span>
+        </div>
+        
         {filteredEvents.length === 0 ? (
-          <div className="empty-state">
-            <Lottie 
-              animationData={eventAnim} 
-              loop={true} 
-              style={{ height: 200 }} 
-            />
-            <h3 className="empty-title">No events found</h3>
-            <p className="empty-message">
-              {searchTerm 
-                ? "Try a different search term or category" 
-                : "Check back later for upcoming events"}
+          <div className="voidState">
+            <Lottie animationData={eventAnimation} loop={true} className="voidAnimation" />
+            <p className="emptyNebula">
+              {searchQuery || activeCategory !== 'All' 
+                ? 'No events match your search' 
+                : 'No upcoming events. Check back later!'}
             </p>
-            <button 
-              className="refresh-button"
-              onClick={() => window.location.reload()}
-            >
-              Refresh Events
-            </button>
+            {(searchQuery || activeCategory !== 'All') && (
+              <button 
+                className="resetOrbitButton"
+                onClick={() => {
+                  setSearchQuery('');
+                  setActiveCategory('All');
+                }}
+              >
+                Reset Filters
+              </button>
+            )}
           </div>
         ) : (
-          <>
-            <div className="events-count">
-              Showing {currentEvents.length} of {filteredEvents.length} events
-            </div>
-            
-            <div className="events-grid">
-              {currentEvents.map(event => (
-                <div 
-                  key={event.id} 
-                  className="event-card"
-                  onClick={() => history.push(`/events/${event.id}`)}
-                >
-                  <div className="event-card-inner">
-                    {event.posterUrl ? (
-                      <div 
-                        className="event-poster"
-                        style={{ backgroundImage: `url(${event.posterUrl})` }}
-                      >
-                        <div className="event-date-badge">
-                          <FiCalendar size={14} />
-                          <span>{formatDate(event.date)}</span>
-                        </div>
-                        {event.category && (
-                          <div className="event-category-badge">
-                            {event.category}
-                          </div>
-                        )}
-                      </div>
-                    ) : (
-                      <div className="event-poster-placeholder">
-                        <div className="placeholder-icon">
-                          <FiCalendar size={32} />
-                        </div>
+          <div className="eventGalaxy">
+            {filteredEvents.map(event => (
+              <div key={event.id} className="eventPlanet" onClick={() => handleEventClick(event)}>
+                {event.imageURL && (
+                  <div className="planetImage">
+                    <img src={event.imageURL} alt={event.title} />
+                    <div className="eventOrbitBadge">
+                      {getDaysUntilEvent(event.date)}
+                    </div>
+                  </div>
+                )}
+                
+                <div className="planetContent">
+                  <div className="planetType">{getEventIcon(event.type)} {event.type}</div>
+                  <h3 className="planetTitle">{event.title}</h3>
+                  
+                  <div className="planetMetadata">
+                    <div className="moonData">
+                      <IoCalendar className="moonIcon" />
+                      <span>{formatDate(event.date)}{event.time && ` • ${event.time}`}</span>
+                    </div>
+                    
+                    {event.venue && (
+                      <div className="moonData">
+                        <IoLocation className="moonIcon" />
+                        <span>{event.venue}</span>
                       </div>
                     )}
                     
-                    <div className="event-info">
-                      <h3 className="event-title">{event.title}</h3>
-                      <div className="event-meta">
-                        <div className="event-location">
-                          <FiMapPin size={14} />
-                          <span>{event.location || "Venue to be announced"}</span>
-                        </div>
-                        {event.time && (
-                          <div className="event-time">
-                            <FiClock size={14} />
-                            <span>{formatTime(event.time)}</span>
-                          </div>
-                        )}
-                      </div>
-                      <div className="event-price">
-                        {event.price ? `From $${event.price}` : "Free Entry"}
-                      </div>
+                    <div className="moonData">
+                      <IoPricetag className="moonIcon" />
+                      <span className={event.isPaid ? 'paidCrater' : 'freeCrater'}>
+                        {event.isPaid ? `Paid Event • ₹${event.price}` : 'Free Event'}
+                      </span>
+                    </div>
+                  </div>
+                  
+                  <button className="viewOrbitButton">
+                    View Details <IoArrowForward />
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Event Detail Modal */}
+      {showEventModal && selectedEvent && (
+        <div className="modalBlackHole" onClick={() => setShowEventModal(false)}>
+          <div className="eventSingularity" onClick={(e) => e.stopPropagation()}>
+            <button className="singularityClose" onClick={() => setShowEventModal(false)}>
+              <IoClose />
+            </button>
+            
+            {selectedEvent.imageURL && (
+              <div className="singularityImage">
+                <img src={selectedEvent.imageURL} alt={selectedEvent.title} />
+                <div className="singularityTime">
+                  {getDaysUntilEvent(selectedEvent.date)}
+                </div>
+              </div>
+            )}
+            
+            <div className="singularityContent">
+              <div className="singularityType">{getEventIcon(selectedEvent.type)} {selectedEvent.type}</div>
+              <h2>{selectedEvent.title}</h2>
+              
+              <div className="singularityMetadata">
+                <div className="singularityData">
+                  <IoCalendar className="dataPulsar" />
+                  <div>
+                    <div className="dataNebula">Date & Time</div>
+                    <div className="dataQuasar">
+                      {formatDate(selectedEvent.date)}{selectedEvent.time && ` • ${selectedEvent.time}`}
                     </div>
                   </div>
                 </div>
-              ))}
-            </div>
-
-            {/* Pagination controls */}
-            {totalPages > 1 && (
-              <div className="pagination-controls">
-                <button
-                  onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-                  disabled={currentPage === 1}
-                  className="pagination-button"
-                >
-                  <FiArrowLeft size={18} />
-                  <span>Previous</span>
-                </button>
                 
-                <div className="page-dots">
-                  {Array.from({ length: totalPages }, (_, i) => (
-                    <button
-                      key={i}
-                      className={`page-dot ${currentPage === i + 1 ? 'active' : ''}`}
-                      onClick={() => setCurrentPage(i + 1)}
-                    />
-                  ))}
+                {selectedEvent.venue && (
+                  <div className="singularityData">
+                    <IoLocation className="dataPulsar" />
+                    <div>
+                      <div className="dataNebula">Venue</div>
+                      <div className="dataQuasar">{selectedEvent.venue}</div>
+                    </div>
+                  </div>
+                )}
+                
+                <div className="singularityData">
+                  <IoPricetag className="dataPulsar" />
+                  <div>
+                    <div className="dataNebula">Registration</div>
+                    <div className="dataQuasar">
+                      {selectedEvent.isPaid ? `Paid Event • ₹${selectedEvent.price}` : 'Free Event'}
+                    </div>
+                  </div>
                 </div>
                 
-                <button
-                  onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-                  disabled={currentPage === totalPages}
-                  className="pagination-button"
-                >
-                  <span>Next</span>
-                  <FiArrowRight size={18} />
+                {selectedEvent.contactInfo && (
+                  <div className="singularityData">
+                    <IoPeople className="dataPulsar" />
+                    <div>
+                      <div className="dataNebula">Contact</div>
+                      <div className="dataQuasar">{selectedEvent.contactInfo}</div>
+                    </div>
+                  </div>
+                )}
+              </div>
+              
+              {selectedEvent.description && (
+                <div className="singularityDescription">
+                  <h3>About this event</h3>
+                  <p>{selectedEvent.description}</p>
+                </div>
+              )}
+              
+              <div className="singularityActions">
+                <button className="registerNova" onClick={handleRegisterClick}>
+                  Register for this Event
                 </button>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Registration Modal */}
+      {showRegistrationModal && selectedEvent && (
+        <div className="modalBlackHole" onClick={() => {
+          setShowRegistrationModal(false);
+          setRegistrationStep('form');
+        }}>
+          <div className="registrationSingularity" onClick={(e) => e.stopPropagation()}>
+            <button className="singularityClose" onClick={() => {
+              setShowRegistrationModal(false);
+              setRegistrationStep('form');
+            }}>
+              <IoClose />
+            </button>
+            
+            {registrationStep === 'complete' ? (
+              <div className="registrationSupernova">
+                <IoCheckmarkCircle className="supernovaIcon" />
+                <h2>Registration Successful!</h2>
+                <p>You've successfully registered for {selectedEvent.title}</p>
+                {selectedEvent.isPaid && <p>Your payment has been verified.</p>}
+                <button 
+                  className="closeButton"
+                  onClick={() => {
+                    setShowRegistrationModal(false);
+                    setRegistrationStep('form');
+                  }}
+                >
+                  Close
+                </button>
+              </div>
+            ) : registrationStep === 'payment' ? (
+              <div className="paymentStep">
+                <div className="singularityHeader">
+                  <h2>Complete Payment</h2>
+                  <p>Please complete the payment to confirm your registration</p>
+                </div>
+                
+                <div className="paymentDetails">
+                  <div className="paymentSummary">
+                    <h4>Order Summary</h4>
+                    <div className="summaryItem">
+                      <span>Event Registration</span>
+                      <span>₹{selectedEvent.price}</span>
+                    </div>
+                    <div className="summaryItem">
+                      <span>Convenience Fee</span>
+                      <span>₹0</span>
+                    </div>
+                    <div className="summaryTotal">
+                      <span>Total Amount</span>
+                      <span>₹{selectedEvent.price}</span>
+                    </div>
+                  </div>
+                  
+                  <div className="studentInfo">
+                    <h4>Student Details</h4>
+                    <p><strong>Name:</strong> {currentRegistration.name}</p>
+                    <p><strong>ID:</strong> {currentRegistration.studentId}</p>
+                    <p><strong>Department:</strong> {currentRegistration.department}</p>
+                  </div>
+                </div>
+                
+                <div className="paymentActions">
+                  <PaymentButton 
+                    amount={selectedEvent.price}
+                    eventName={selectedEvent.title}
+                    onSuccess={handlePaymentSuccess}
+                    onError={handlePaymentError}
+                  />
+                  
+                  <button 
+                    onClick={() => setRegistrationStep('form')}
+                    className="backButton"
+                  >
+                    Back to Registration Form
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <>
+                <div className="singularityHeader">
+                  <h2>Register for {selectedEvent.title}</h2>
+                  <p>Please fill in your details to complete registration</p>
+                </div>
+                
+                <form onSubmit={handleRegistrationSubmit} className="registrationOrbit">
+                  <div className="orbitGroup">
+                    <label>Full Name *</label>
+                    <input
+                      type="text"
+                      name="name"
+                      value={registrationData.name}
+                      onChange={handleRegistrationChange}
+                      required
+                    />
+                  </div>
+                  
+                  <div className="orbitGroup">
+                    <label>Email Address *</label>
+                    <input
+                      type="email"
+                      name="email"
+                      value={registrationData.email}
+                      onChange={handleRegistrationChange}
+                      required
+                    />
+                  </div>
+                  
+                  <div className="orbitGroup">
+                    <label>Phone Number *</label>
+                    <input
+                      type="tel"
+                      name="phone"
+                      value={registrationData.phone}
+                      onChange={handleRegistrationChange}
+                      required
+                    />
+                  </div>
+                  
+                  <div className="orbitGroup">
+                    <label>Student ID *</label>
+                    <input
+                      type="text"
+                      name="studentId"
+                      value={registrationData.studentId}
+                      onChange={handleRegistrationChange}
+                      required
+                    />
+                  </div>
+                  
+                  <div className="orbitGroup">
+                    <label>Department *</label>
+                    <input
+                      type="text"
+                      name="department"
+                      value={registrationData.department}
+                      onChange={handleRegistrationChange}
+                      required
+                    />
+                  </div>
+                  
+                  {selectedEvent.isPaid && selectedEvent.paymentQRURL && (
+                    <div className="paymentAstral">
+                      <IoAlertCircle className="astralIcon" />
+                      <p>This is a paid event. Please complete payment to confirm your registration.</p>
+                      <img src={selectedEvent.paymentQRURL} alt="Payment QR Code" className="astralQR" />
+                    </div>
+                  )}
+                  
+                  <button type="submit" disabled={isRegistering} className="submitOrbitButton">
+                    {isRegistering ? 'Processing...' : (selectedEvent.isPaid ? 'Continue to Payment' : 'Complete Registration')}
+                  </button>
+                </form>
+              </>
             )}
-          </>
-        )}
-      </main>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
 
-export default EventRegistration;
+export default CampusEvents;

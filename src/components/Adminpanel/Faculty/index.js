@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { collection, getDocs, addDoc, deleteDoc, doc, updateDoc } from 'firebase/firestore';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { db, storage } from '../../../firebase';
-import { FiUpload, FiTrash2, FiUser, FiMail, FiPhone, FiHome, FiEdit, FiChevronDown, FiX, FiPlus } from 'react-icons/fi';
+import { collection, getDocs, addDoc, deleteDoc, doc, updateDoc, query, where } from 'firebase/firestore';
+import { ref, onValue, off } from 'firebase/database';
+import { ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { db, storage, realtimeDb } from '../../../firebase'; // Import realtimeDb
+import { FiUpload, FiTrash2, FiUser, FiMail, FiPhone, FiHome, FiEdit, FiChevronDown, FiX, FiPlus, FiBook, FiUserCheck, FiUserX } from 'react-icons/fi';
 import './index.css';
 
 const FacultyManagement = () => {
@@ -13,6 +14,8 @@ const FacultyManagement = () => {
   const [error, setError] = useState(null);
   const [editingId, setEditingId] = useState(null);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [registerNoError, setRegisterNoError] = useState('');
+  const [currentFaculty, setCurrentFaculty] = useState(null); // Track current faculty in cabin
   
   const departments = {
     'cse': 'Computer Science & Engineering',
@@ -26,6 +29,7 @@ const FacultyManagement = () => {
   };
 
   const [newFaculty, setNewFaculty] = useState({
+    registerNo: '',
     name: '',
     department: '',
     email: '',
@@ -35,6 +39,34 @@ const FacultyManagement = () => {
     FAClass: '',
     timetable: {}
   });
+
+  // Listen to Realtime Database for current faculty presence
+  useEffect(() => {
+    const presenceRef = ref(realtimeDb, '/chair');
+    
+    const unsubscribe = onValue(presenceRef, (snapshot) => {
+      if (snapshot.exists()) {
+        const data = snapshot.val();
+        const currentRegisterNo = data.current_register_no || '';
+        const currentStatus = data.current_status || 'Absent';
+        
+        // Find the faculty member with the current register number
+        if (currentRegisterNo && currentStatus === 'Present') {
+          const currentFacultyMember = faculty.find(f => f.registerNo === currentRegisterNo);
+          setCurrentFaculty(currentFacultyMember || { registerNo: currentRegisterNo, status: 'Present' });
+        } else {
+          setCurrentFaculty(null);
+        }
+      }
+    }, (error) => {
+      console.error("Error listening to Realtime Database:", error);
+    });
+
+    // Cleanup listener on unmount
+    return () => {
+      off(presenceRef, 'value', unsubscribe);
+    };
+  }, [faculty]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -51,6 +83,7 @@ const FacultyManagement = () => {
 
   const resetForm = () => {
     setNewFaculty({
+      registerNo: '',
       name: '',
       department: '',
       email: '',
@@ -62,13 +95,41 @@ const FacultyManagement = () => {
     });
     setImageFile(null);
     setEditingId(null);
+    setRegisterNoError('');
   };
 
   const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    
+    // Clear register number error when user starts typing
+    if (name === 'registerNo' && registerNoError) {
+      setRegisterNoError('');
+    }
+    
     setNewFaculty({
       ...newFaculty,
-      [e.target.name]: e.target.value
+      [name]: value
     });
+  };
+
+  const checkRegisterNoExists = async (registerNo) => {
+    try {
+      const q = query(
+        collection(db, 'faculty'), 
+        where('registerNo', '==', registerNo)
+      );
+      const querySnapshot = await getDocs(q);
+      
+      // If editing, exclude the current faculty member from the check
+      if (editingId) {
+        return querySnapshot.docs.some(doc => doc.id !== editingId);
+      }
+      
+      return !querySnapshot.empty;
+    } catch (error) {
+      console.error("Error checking register number:", error);
+      return false;
+    }
   };
 
   const handleImageChange = (e) => {
@@ -94,8 +155,8 @@ const FacultyManagement = () => {
     if (!imageFile) return null;
     
     try {
-      const storageRef = ref(storage, `faculty_images/${Date.now()}_${imageFile.name}`);
-      const snapshot = await uploadBytes(storageRef, imageFile);
+      const ref = storageRef(storage, `faculty_images/${Date.now()}_${imageFile.name}`);
+      const snapshot = await uploadBytes(ref, imageFile);
       const downloadURL = await getDownloadURL(snapshot.ref);
       return downloadURL;
     } catch (error) {
@@ -105,14 +166,29 @@ const FacultyManagement = () => {
   };
 
   const handleAddFaculty = async () => {
-    if (!newFaculty.name || !newFaculty.department || !newFaculty.email) {
-      setError("Name, department and email are required");
+    if (!newFaculty.registerNo || !newFaculty.name || !newFaculty.department || !newFaculty.email) {
+      setError("Register number, name, department and email are required");
+      return;
+    }
+
+    // Validate register number format (alphanumeric, 6-15 characters)
+    const registerNoRegex = /^[a-zA-Z0-9]{6,15}$/;
+    if (!registerNoRegex.test(newFaculty.registerNo)) {
+      setError("Register number must be 6-15 alphanumeric characters");
       return;
     }
 
     try {
+      // Check if register number already exists
+      const registerNoExists = await checkRegisterNoExists(newFaculty.registerNo);
+      if (registerNoExists) {
+        setRegisterNoError('This register number is already in use');
+        return;
+      }
+
       setIsAddingFaculty(true);
       setError(null);
+      setRegisterNoError('');
 
       let imageUrl = newFaculty.imageUrl || '';
       if (imageFile) {
@@ -122,7 +198,8 @@ const FacultyManagement = () => {
       const facultyData = {
         ...newFaculty,
         imageUrl: imageUrl || null,
-        createdAt: new Date().toISOString()
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
       };
 
       if (editingId) {
@@ -146,6 +223,7 @@ const FacultyManagement = () => {
 
   const handleEdit = (facultyMember) => {
     setNewFaculty({
+      registerNo: facultyMember.registerNo || '',
       name: facultyMember.name,
       department: facultyMember.department,
       email: facultyMember.email,
@@ -243,6 +321,41 @@ const FacultyManagement = () => {
         </div>
       </header>
 
+      {/* Current Faculty Status Card */}
+      {currentFaculty && (
+        <div className="current-faculty-card">
+          <div className="current-faculty-header">
+            <FiUserCheck className="present-icon" />
+            <h3>Currently in Cabin</h3>
+          </div>
+          <div className="current-faculty-details">
+            {currentFaculty.name ? (
+              <>
+                <div className="current-faculty-avatar">
+                  {currentFaculty.imageUrl ? (
+                    <img src={currentFaculty.imageUrl} alt={currentFaculty.name} />
+                  ) : (
+                    <FiUser size={32} />
+                  )}
+                </div>
+                <div className="current-faculty-info">
+                  <h4>{currentFaculty.name}</h4>
+                  <p>{departments[currentFaculty.department] || currentFaculty.department}</p>
+                  <p className="register-no">ID: {currentFaculty.registerNo}</p>
+                  {currentFaculty.cabin && <p>Cabin: {currentFaculty.cabin}</p>}
+                </div>
+              </>
+            ) : (
+              <div className="unknown-faculty">
+                <FiUserX size={32} />
+                <p>Unknown Faculty (ID: {currentFaculty.registerNo})</p>
+                <small>This faculty member is not in the database</small>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
       {error && (
         <div className="error-message">
           {error}
@@ -277,6 +390,11 @@ const FacultyManagement = () => {
                     <div className="faculty-info">
                       <h3>{member.name}</h3>
                       <p className="department">{departments[member.department] || member.department}</p>
+                      {member.registerNo && (
+                        <p className="register-no">
+                          <FiBook size={12} /> Reg No: {member.registerNo}
+                        </p>
+                      )}
                       {member.isFA && member.FAClass && (
                         <span className="fa-badge">Class Teacher: {member.FAClass}</span>
                       )}
@@ -326,6 +444,22 @@ const FacultyManagement = () => {
           <div className="add-faculty-form">
             <div className="form-section">
               <h2>Basic Information</h2>
+              
+              <div className="input-group">
+                <label>Register Number *</label>
+                <input
+                  type="text"
+                  name="registerNo"
+                  placeholder="Enter register number (e.g., FAC123)"
+                  value={newFaculty.registerNo}
+                  onChange={handleInputChange}
+                  required
+                  className={registerNoError ? 'error' : ''}
+                />
+                {registerNoError && <span className="field-error">{registerNoError}</span>}
+                <small className="helper-text">Must be 6-15 alphanumeric characters</small>
+              </div>
+              
               <div className="input-group">
                 <label>Full Name *</label>
                 <input
@@ -387,7 +521,30 @@ const FacultyManagement = () => {
                 />
               </div>
 
+              <div className="input-group checkbox-group">
+                <label>
+                  <input
+                    type="checkbox"
+                    name="isFA"
+                    checked={newFaculty.isFA}
+                    onChange={(e) => setNewFaculty({...newFaculty, isFA: e.target.checked})}
+                  />
+                  Is Class Teacher
+                </label>
+              </div>
               
+              {newFaculty.isFA && (
+                <div className="input-group">
+                  <label>Class Assigned</label>
+                  <input
+                    type="text"
+                    name="FAClass"
+                    placeholder="Enter class (e.g., CSE-A)"
+                    value={newFaculty.FAClass}
+                    onChange={handleInputChange}
+                  />
+                </div>
+              )}
             </div>
             
             <div className="form-section">
@@ -466,7 +623,7 @@ const FacultyManagement = () => {
               <button 
                 onClick={handleAddFaculty}
                 className="primary-button"
-                disabled={isAddingFaculty || !newFaculty.name || !newFaculty.department || !newFaculty.email}
+                disabled={isAddingFaculty || !newFaculty.registerNo || !newFaculty.name || !newFaculty.department || !newFaculty.email}
               >
                 {isAddingFaculty 
                   ? (editingId ? 'Updating...' : 'Adding...') 
