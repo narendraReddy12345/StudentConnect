@@ -339,3 +339,123 @@ input:checked + .slider:before {
     width: 100%;
   }
 }
+.updates-scroll-container {
+  height: calc(100vh - 150px);
+  overflow-y: auto;
+  perspective: 1000px;
+  position: relative;
+}
+
+.updates-list {
+  position: relative;
+  padding: 20px;
+}
+
+.update-card {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px;
+  padding: 20px;
+  position: relative;
+  transform-style: preserve-3d;
+  backface-visibility: hidden;
+  transition: all 0.3s ease;
+}
+
+.update-card.important {
+  border-left: 4px solid #ff4757;
+}
+
+.update-badge {
+  position: absolute;
+  top: -10px;
+  right: 20px;
+  background: #ff4757;
+  color: white;
+  padding: 5px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.update-content h3 {
+  margin-top: 0;
+  color: #2c3e50;
+}
+
+.update-date {
+  color: #7f8c8d;
+  font-size: 12px;
+  margin-bottom: 15px;
+}
+
+.update-media {
+  margin: 15px 0;
+}
+
+.update-media img {
+  width: 100%;
+  border-radius: 8px;
+}
+
+.update-media video {
+  width: 100%;
+  border-radius: 8px;
+}
+
+.update-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 15px;
+}
+
+.edit-btn, .delete-btn {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 8px 15px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.edit-btn {
+  background: #3498db;
+  color: white;
+}
+
+.delete-btn {
+  background: #e74c3c;
+  color: white;
+}
+
+.edit-btn:hover {
+  background: #2980b9;
+}
+
+.delete-btn:hover {
+  background: #c0392b;
+}
+
+/* Custom scrollbar for the container */
+.updates-scroll-container::-webkit-scrollbar {
+  width: 6px;
+}
+
+.updates-scroll-container::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 10px;
+}
+
+.updates-scroll-container::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 10px;
+}
+
+.updates-scroll-container::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}

@@ -11,6 +11,7 @@ import eventAnim from "../assets/fuGIip804B.json";
 import aiAnim from "../assets/94ye6EefMs.json";
 import formAnim from "../assets/KE3rP60rHv.json";
 import updatesAnim from "../assets/Ltz69bkEEA.json";
+import map from "../assets/t9sC61E7hk.json";
 import adminAnim from '../assets/IGeZmAD5Dp.json';
 
 // Import college images (you'll need to add these to your assets)
@@ -124,6 +125,13 @@ const Home = ({ user, setUser }) => {
           animationData={formAnim}
           onClick={() => history.push("/forms")}
         />
+       <FeatureCard
+          title="AR Navigation Map"
+          animationData={map}
+          onClick={() => window.open("https://v0-ar-navigation-app-ten.vercel.app/", "_blank")}
+          
+        />
+
         <FeatureCard
           title="AI Assistant"
           animationData={aiAnim}

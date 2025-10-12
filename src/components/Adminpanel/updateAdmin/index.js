@@ -1,13 +1,96 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useHistory } from "react-router-dom";
 import { storage,db } from "../../../firebase";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { collection, addDoc, query, orderBy, onSnapshot, deleteDoc, doc } from "firebase/firestore";
-import { motion } from "framer-motion";
+import { motion, useScroll, useTransform, useSpring } from "framer-motion";
 import { FiUpload, FiTrash2, FiEdit, FiPlus, FiX } from "react-icons/fi";
 import Lottie from "lottie-react";
 import updatesAnim from "../../../assets/Ltz69bkEEA.json";
 import './index.css'
+
+// Create a separate component for the animated update card
+const AnimatedUpdateCard = ({ update, index, totalItems, handleDelete }) => {
+  const scrollContainerRef = useRef(null);
+  const { scrollYProgress } = useScroll({
+    container: scrollContainerRef
+  });
+  
+  const smoothScroll = useSpring(scrollYProgress, {
+    stiffness: 100,
+    damping: 30,
+    restDelta: 0.001
+  });
+  
+  // Calculate progress for each card
+  const cardProgress = useTransform(
+    smoothScroll,
+    [index / totalItems, (index + 1) / totalItems],
+    [0, 1]
+  );
+  
+  // Transform values for the folding effect
+  const rotateX = useTransform(cardProgress, [0, 0.5, 1], [0, -90, -180]);
+  const scale = useTransform(cardProgress, [0, 0.5, 1], [1, 0.9, 0.8]);
+  const zIndex = useTransform(cardProgress, 
+    [0, 0.4, 0.41, 0.6, 0.61, 1], 
+    [totalItems - index, totalItems - index, 100, 100, totalItems - index, totalItems - index]
+  );
+  const opacity = useTransform(cardProgress, [0, 0.49, 0.51, 1], [1, 1, 0, 0]);
+  
+  return (
+    <motion.div 
+      style={{
+        rotateX,
+        scale,
+        zIndex,
+        opacity,
+        transformOrigin: "top center",
+        perspective: "1000px"
+      }}
+      className={`update-card ${update.isImportant ? "important" : ""}`}
+    >
+      <div className="update-badge">
+        {update.isImportant ? "❗ Important" : "📢 Update"}
+      </div>
+      
+      <div className="update-content">
+        <h3>{update.title}</h3>
+        <p className="update-date">
+          {new Date(update.createdAt?.seconds * 1000).toLocaleString()}
+        </p>
+        <p>{update.description}</p>
+        
+        {update.imageUrl && (
+          <div className="update-media">
+            <img src={update.imageUrl} alt={update.title} />
+          </div>
+        )}
+        
+        {update.videoUrl && (
+          <div className="update-media">
+            <video controls>
+              <source src={update.videoUrl} type="video/mp4" />
+              Your browser does not support the video tag.
+            </video>
+          </div>
+        )}
+      </div>
+      
+      <div className="update-actions">
+        <button className="edit-btn">
+          <FiEdit /> Edit
+        </button>
+        <button 
+          onClick={() => handleDelete(update.id)} 
+          className="delete-btn"
+        >
+          <FiTrash2 /> Delete
+        </button>
+      </div>
+    </motion.div>
+  );
+};
 
 const UpdatesAdmin = () => {
   const history = useHistory();
@@ -23,6 +106,9 @@ const UpdatesAdmin = () => {
   const [imagePreview, setImagePreview] = useState("");
   const [videoPreview, setVideoPreview] = useState("");
   const [isImportant, setIsImportant] = useState(false);
+
+  // Ref for scroll container
+  const scrollContainerRef = useRef(null);
 
   useEffect(() => {
     const q = query(collection(db, "updates"), orderBy("createdAt", "desc"));
@@ -252,60 +338,25 @@ const UpdatesAdmin = () => {
           <p>Loading updates...</p>
         </div>
       ) : (
-        <div className="updates-list">
-          {updates.length === 0 ? (
-            <div className="empty-state">
-              <Lottie animationData={updatesAnim} loop={true} style={{ height: 200 }} />
-              <p>No updates yet. Add your first update!</p>
-            </div>
-          ) : (
-            updates.map((update) => (
-              <motion.div 
-                key={update.id}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                className={`update-card ${update.isImportant ? "important" : ""}`}
-              >
-                <div className="update-badge">
-                  {update.isImportant ? "❗ Important" : "📢 Update"}
-                </div>
-                
-                <div className="update-content">
-                  <h3>{update.title}</h3>
-                  <p className="update-date">
-                    {new Date(update.createdAt?.seconds * 1000).toLocaleString()}
-                  </p>
-                  <p className="update-description">{update.description}</p>
-                  
-                  {update.imageUrl && (
-                    <div className="update-media">
-                      <img src={update.imageUrl} alt={update.title} />
-                    </div>
-                  )}
-                  
-                  {update.videoUrl && (
-                    <div className="update-media">
-                      <video controls>
-                        <source src={update.videoUrl} type="video/mp4" />
-                      </video>
-                    </div>
-                  )}
-                </div>
-                
-                <div className="update-actions">
-                  <button className="edit-btn">
-                    <FiEdit /> Edit
-                  </button>
-                  <button 
-                    onClick={() => handleDelete(update.id)} 
-                    className="delete-btn"
-                  >
-                    <FiTrash2 /> Delete
-                  </button>
-                </div>
-              </motion.div>
-            ))
-          )}
+        <div className="updates-scroll-container" ref={scrollContainerRef}>
+          <div className="updates-list">
+            {updates.length === 0 ? (
+              <div className="empty-state">
+                <Lottie animationData={updatesAnim} loop={true} style={{ height: 200 }} />
+                <p>No updates yet. Add your first update!</p>
+              </div>
+            ) : (
+              updates.map((update, index) => (
+                <AnimatedUpdateCard 
+                  key={update.id}
+                  update={update}
+                  index={index}
+                  totalItems={updates.length}
+                  handleDelete={handleDelete}
+                />
+              ))
+            )}
+          </div>
         </div>
       )}
     </div>
