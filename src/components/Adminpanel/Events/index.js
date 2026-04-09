@@ -1,13 +1,12 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useHistory } from 'react-router-dom';
-import { storage, db } from '../../../firebase';
-import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
+import { db } from '../../../firebase';
 import { collection, addDoc, getDocs, deleteDoc, doc, updateDoc } from 'firebase/firestore';
 import Lottie from 'lottie-react';
 import eventAnimation from '../../../assets/fuGIip804B.json';
 import './EventManagement.css';
 
-// Import icons (you can use react-icons or custom SVGs)
+// Import icons
 import { 
   IoArrowBack, 
   IoSearch, 
@@ -31,6 +30,10 @@ const EventManagement = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [activeCategory, setActiveCategory] = useState('All');
   
+  // Cloudinary configuration
+  const CLOUD_NAME = 'dmu3tqxgb'; // Your Cloudinary cloud name
+  const UPLOAD_PRESET = 'eventimgs'; // Your upload preset
+
   const eventTypes = [
     'Technical Workshop',
     'Hackathon',
@@ -65,11 +68,9 @@ const EventManagement = () => {
     fetchEvents();
   }, []);
 
-  // Use useCallback to memoize the filterEvents function
   const filterEvents = useCallback(() => {
     let results = events;
     
-    // Filter by search query
     if (searchQuery) {
       results = results.filter(event => 
         event.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -77,7 +78,6 @@ const EventManagement = () => {
       );
     }
     
-    // Filter by category
     if (activeCategory !== 'All') {
       results = results.filter(event => event.type === activeCategory);
     }
@@ -87,7 +87,7 @@ const EventManagement = () => {
 
   useEffect(() => {
     filterEvents();
-  }, [filterEvents]); // Now filterEvents is stable because it's memoized with useCallback
+  }, [filterEvents]);
 
   const fetchEvents = async () => {
     try {
@@ -96,7 +96,6 @@ const EventManagement = () => {
       querySnapshot.forEach((doc) => {
         eventsData.push({ id: doc.id, ...doc.data() });
       });
-      // Sort events by date (newest first)
       eventsData.sort((a, b) => new Date(b.date) - new Date(a.date));
       setEvents(eventsData);
     } catch (error) {
@@ -104,34 +103,63 @@ const EventManagement = () => {
     }
   };
 
-  // Rest of the component remains the same...
-  const handleImageChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setNewEvent({
-          ...newEvent,
-          image: file,
-          imagePreview: reader.result
-        });
-      };
-      reader.readAsDataURL(file);
+  const uploadToCloudinary = async (file) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('upload_preset', UPLOAD_PRESET);
+    
+    try {
+      const response = await fetch(
+        `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`,
+        {
+          method: 'POST',
+          body: formData,
+        }
+      );
+      return await response.json();
+    } catch (error) {
+      console.error('Upload error:', error);
+      throw error;
     }
   };
 
-  const handleQRChange = (e) => {
+  const handleImageChange = async (e) => {
     const file = e.target.files[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
+      setIsUploading(true);
+      try {
+        const data = await uploadToCloudinary(file);
         setNewEvent({
           ...newEvent,
-          paymentQR: file,
-          paymentQRPreview: reader.result
+          image: data.secure_url,
+          imagePreview: data.secure_url,
         });
-      };
-      reader.readAsDataURL(file);
+      } catch (error) {
+        console.error('Error uploading image:', error);
+        alert('Image upload failed. Please try again.');
+      } finally {
+        setIsUploading(false);
+      }
+    }
+  };
+
+  const handleQRChange = async (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setIsUploading(true);
+      try {
+        const data = await uploadToCloudinary(file);
+        setNewEvent({
+          ...newEvent,
+          paymentQR: data.secure_url,
+          paymentQRPreview: data.secure_url,
+        });
+      } catch (error) {
+        console.error('Error uploading QR code:', error);
+        alert('QR code upload failed. Please try again.');
+      } finally {
+        setIsUploading(false);
+      }
     }
   };
 
@@ -144,23 +172,6 @@ const EventManagement = () => {
 
     setIsUploading(true);
     try {
-      let imageURL = '';
-      let qrURL = '';
-
-      // Upload image if exists
-      if (newEvent.image) {
-        const imageRef = ref(storage, `events/${Date.now()}_${newEvent.image.name}`);
-        await uploadBytes(imageRef, newEvent.image);
-        imageURL = await getDownloadURL(imageRef);
-      }
-
-      // Upload QR code if exists and event is paid
-      if (newEvent.isPaid && newEvent.paymentQR) {
-        const qrRef = ref(storage, `payments/${Date.now()}_${newEvent.paymentQR.name}`);
-        await uploadBytes(qrRef, newEvent.paymentQR);
-        qrURL = await getDownloadURL(qrRef);
-      }
-
       // Prepare event data for Firestore
       const eventData = {
         title: newEvent.title,
@@ -173,21 +184,18 @@ const EventManagement = () => {
         isPaid: newEvent.isPaid,
         contactInfo: newEvent.contactInfo,
         createdAt: new Date().toISOString(),
-        imageURL: imageURL,
-        paymentQRURL: qrURL
+        imageURL: newEvent.imagePreview || '',
+        paymentQRURL: newEvent.isPaid ? (newEvent.paymentQRPreview || '') : ''
       };
 
       if (isEditing && editingEventId) {
-        // Update existing event
         await updateDoc(doc(db, 'events', editingEventId), eventData);
         alert('Event updated successfully!');
       } else {
-        // Add new event
         await addDoc(collection(db, 'events'), eventData);
         alert('Event added successfully!');
       }
 
-      // Reset form and refresh events list
       resetForm();
       fetchEvents();
     } catch (error) {
@@ -219,27 +227,12 @@ const EventManagement = () => {
     setShowForm(true);
   };
 
-  const handleDelete = async (eventId, imageURL, qrURL) => {
+  const handleDelete = async (eventId) => {
     if (window.confirm('Are you sure you want to delete this event?')) {
       try {
-        // Delete from Firestore
         await deleteDoc(doc(db, 'events', eventId));
-        
-        // Delete image from Storage if exists
-        if (imageURL) {
-          const imageRef = ref(storage, imageURL);
-          await deleteObject(imageRef);
-        }
-        
-        // Delete QR code from Storage if exists
-        if (qrURL) {
-          const qrRef = ref(storage, qrURL);
-          await deleteObject(qrRef);
-        }
-        
-        // Refresh events list
-        fetchEvents();
         alert('Event deleted successfully!');
+        fetchEvents();
       } catch (error) {
         console.error("Error deleting event: ", error);
         alert('Error deleting event. Please try again.');
@@ -292,7 +285,6 @@ const EventManagement = () => {
 
   return (
     <div className="event-management-container">
-      {/* Header with back button and title */}
       <div className="event-header">
         <button onClick={() => history.goBack()} className="back-btn">
           <IoArrowBack size={24} />
@@ -306,7 +298,6 @@ const EventManagement = () => {
         </button>
       </div>
 
-      {/* Search Section */}
       <div className="search-section">
         <div className="search-bar">
           <IoSearch className="search-icon" />
@@ -434,6 +425,7 @@ const EventManagement = () => {
                     type="file"
                     accept="image/*"
                     onChange={handleQRChange}
+                    disabled={isUploading}
                   />
                   {newEvent.paymentQRPreview && (
                     <div className="image-preview">
@@ -458,6 +450,7 @@ const EventManagement = () => {
                   type="file"
                   accept="image/*"
                   onChange={handleImageChange}
+                  disabled={isUploading}
                 />
                 {newEvent.imagePreview && (
                   <div className="image-preview">
@@ -478,10 +471,19 @@ const EventManagement = () => {
             </div>
             
             <div className="form-actions">
-              <button type="button" onClick={resetForm} className="cancel-btn">
+              <button 
+                type="button" 
+                onClick={resetForm} 
+                className="cancel-btn"
+                disabled={isUploading}
+              >
                 Cancel
               </button>
-              <button type="submit" disabled={isUploading} className="submit-btn">
+              <button 
+                type="submit" 
+                disabled={isUploading} 
+                className="submit-btn"
+              >
                 {isUploading ? 'Saving...' : (isEditing ? 'Update Event' : 'Create Event')}
               </button>
             </div>
@@ -528,10 +530,17 @@ const EventManagement = () => {
           <div className="events-grid">
             {filteredEvents.map(event => (
               <div key={event.id} className="event-card">
-               
+                {event.imageURL && (
+                  <div className="event-image">
+                    <img src={event.imageURL} alt={event.title} />
+                  </div>
+                )}
                 <div className="event-content">
                   <div className="event-header">
                     <h4>{event.title}</h4>
+                    <span className="event-type">
+                      {getEventIcon(event.type)} {event.type}
+                    </span>
                   </div>
                   
                   <div className="event-details">
@@ -574,7 +583,7 @@ const EventManagement = () => {
                       Edit
                     </button>
                     <button 
-                      onClick={() => handleDelete(event.id, event.imageURL, event.paymentQRURL)}
+                      onClick={() => handleDelete(event.id)}
                       className="delete-btn"
                     >
                       <IoTrash size={18} />

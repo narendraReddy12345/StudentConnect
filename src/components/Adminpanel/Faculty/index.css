@@ -1,183 +1,374 @@
-/* Mobile First Styles */
+/* Instagram-inspired Faculty Management UI */
+:root {
+  --primary: #0095f6;
+  --primary-dark: #0077cc;
+  --secondary: #8e8e8e;
+  --background: #fafafa;
+  --card-bg: #ffffff;
+  --text: #262626;
+  --text-light: #8e8e8e;
+  --border: #dbdbdb;
+  --error: #ed4956;
+  --success: #4cb5f9;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  background-color: var(--background);
+  color: var(--text);
+  line-height: 1.5;
+}
+
+/* App Container */
 .faculty-app {
-  max-width: 100%;
-  overflow-x: hidden;
+  max-width: 600px;
+  margin: 0 auto;
+  background-color: var(--background);
+  min-height: 100vh;
 }
 
-/* Header Styles */
-.desktop-header {
-  display: none;
-}
-
-.mobile-header {
+/* Header */
+.app-header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 1rem;
-  background-color: #f8f9fa;
-  border-bottom: 1px solid #e1e4e8;
+  padding: 16px;
+  background-color: var(--card-bg);
+  border-bottom: 1px solid var(--border);
 }
 
-.mobile-menu-button {
+.app-header h1 {
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.add-button {
   background: none;
   border: none;
-  color: #333;
+  color: var(--primary);
   font-size: 1.5rem;
   cursor: pointer;
-}
-
-.mobile-menu {
-  display: flex;
-  flex-direction: column;
-  background-color: #fff;
-  border-bottom: 1px solid #e1e4e8;
-  z-index: 100;
-}
-
-.mobile-menu-item {
-  padding: 1rem;
-  text-align: left;
-  border: none;
-  background: none;
-  color: #333;
-  font-size: 1rem;
-  border-bottom: 1px solid #f0f0f0;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.mobile-menu-item.active {
-  background-color: #f0f7ff;
-  color: #1976d2;
-}
-
-/* Faculty List */
-.faculty-list {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 1rem;
-  padding: 1rem;
-}
-
-.faculty-card {
-  background: white;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-  padding: 1rem;
-  display: flex;
-  flex-direction: column;
-}
-
-.card-header {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  margin-bottom: 1rem;
-}
-
-.faculty-avatar, .avatar-placeholder {
-  width: 50px;
-  height: 50px;
-  border-radius: 50%;
-  background-color: #f0f0f0;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-.faculty-avatar {
+/* Current Faculty Card */
+.current-faculty-card {
+  display: flex;
+  align-items: center;
+  padding: 16px;
+  background-color: var(--card-bg);
+  border-bottom: 1px solid var(--border);
+}
+
+.current-avatar {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background-color: #f0f0f0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 16px;
+  overflow: hidden;
+}
+
+.current-avatar img {
+  width: 100%;
+  height: 100%;
   object-fit: cover;
 }
 
+.current-avatar svg {
+  color: var(--secondary);
+}
+
+.current-info h3 {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.current-info p {
+  font-size: 0.875rem;
+  color: var(--secondary);
+}
+
+/* Error Message */
+.error-message {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  margin: 0 16px;
+  background-color: rgba(237, 73, 86, 0.1);
+  color: var(--error);
+  border-radius: 8px;
+  font-size: 0.875rem;
+  margin-top: 8px;
+}
+
+.error-message button {
+  background: none;
+  border: none;
+  color: inherit;
+  cursor: pointer;
+}
+
+/* Faculty List */
+.faculty-list {
+  padding: 8px 0 60px;
+}
+
+.loading-state, .empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  text-align: center;
+}
+
+.loading-state p, .empty-state p {
+  color: var(--secondary);
+  margin-bottom: 16px;
+}
+
+/* Faculty Card */
+.faculty-card {
+  background-color: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  margin: 16px;
+  overflow: hidden;
+}
+
+.card-header {
+  display: flex;
+  align-items: center;
+  padding: 16px;
+}
+
+.faculty-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background-color: #f0f0f0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 12px;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.faculty-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.faculty-avatar svg {
+  color: var(--secondary);
+}
+
+.faculty-info {
+  flex: 1;
+  min-width: 0;
+}
+
 .faculty-info h3 {
-  margin: 0;
-  font-size: 1.1rem;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  margin-bottom: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .department {
-  margin: 0.25rem 0 0;
-  font-size: 0.9rem;
-  color: #666;
+  font-size: 0.8125rem;
+  color: var(--secondary);
+  margin-bottom: 4px;
 }
 
-.fa-badge {
-  display: inline-block;
-  background-color: #e3f2fd;
-  color: #1976d2;
-  padding: 0.25rem 0.5rem;
-  border-radius: 4px;
-  font-size: 0.8rem;
-  margin-top: 0.25rem;
+.register-no {
+  display: flex;
+  align-items: center;
+  font-size: 0.75rem;
+  color: var(--secondary);
+}
+
+.register-no svg {
+  margin-right: 4px;
 }
 
 .card-details {
-  margin: 1rem 0;
+  padding: 0 16px 16px;
 }
 
 .detail-item {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  margin-bottom: 0.5rem;
-  font-size: 0.9rem;
+  margin-bottom: 8px;
+  font-size: 0.875rem;
+}
+
+.detail-item .icon {
+  margin-right: 8px;
+  color: var(--secondary);
+  min-width: 20px;
 }
 
 .card-actions {
   display: flex;
   justify-content: flex-end;
-  gap: 0.5rem;
+  padding: 12px 16px;
+  border-top: 1px solid var(--border);
 }
 
-.edit-button, .delete-button {
+.action-button {
   background: none;
   border: none;
-  padding: 0.5rem;
-  border-radius: 4px;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  margin-left: 8px;
+  transition: background-color 0.2s;
+}
+
+.action-button.edit {
+  color: var(--primary);
+  background-color: rgba(0, 149, 246, 0.1);
+}
+
+.action-button.delete {
+  color: var(--error);
+  background-color: rgba(237, 73, 86, 0.1);
+}
+
+.action-button.edit:hover {
+  background-color: rgba(0, 149, 246, 0.2);
+}
+
+.action-button.delete:hover {
+  background-color: rgba(237, 73, 86, 0.2);
+}
+
+/* Faculty Form */
+.faculty-form {
+  background-color: var(--card-bg);
+  min-height: calc(100vh - 60px);
+}
+
+.form-header {
+  display: flex;
+  align-items: center;
+  padding: 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.form-header h2 {
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin-left: 16px;
+}
+
+.back-button {
+  background: none;
+  border: none;
+  font-size: 1.25rem;
+  cursor: pointer;
+  color: var(--text);
+}
+
+/* Image Upload */
+.image-upload {
+  display: flex;
+  justify-content: center;
+  padding: 24px 0;
   cursor: pointer;
 }
 
-.edit-button {
-  color: #1976d2;
+.avatar-preview {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  background-color: #f0f0f0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
 }
 
-.delete-button {
-  color: #d32f2f;
+.avatar-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
-/* Form Styles */
-.add-faculty-form {
-  padding: 1rem;
+.upload-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  color: var(--secondary);
 }
 
+.upload-placeholder svg {
+  margin-bottom: 8px;
+}
+
+.hidden-input {
+  display: none;
+}
+
+/* Form Groups */
 .form-section {
-  margin-bottom: 2rem;
+  margin-bottom: 8px;
 }
 
-.form-section h2 {
-  font-size: 1.2rem;
-  margin-bottom: 1rem;
-  padding-bottom: 0.5rem;
-  border-bottom: 1px solid #eee;
+.form-group {
+  padding: 0 16px;
+  margin-bottom: 16px;
 }
 
-.input-group {
-  margin-bottom: 1.25rem;
-}
-
-.input-group label {
+.form-group label {
   display: block;
-  margin-bottom: 0.5rem;
+  margin-bottom: 8px;
+  font-size: 0.875rem;
   font-weight: 500;
 }
 
-.input-group input,
-.input-group select {
+.form-group input,
+.form-group select,
+.form-group textarea {
   width: 100%;
-  padding: 0.75rem;
-  border: 1px solid #ddd;
-  border-radius: 6px;
-  font-size: 1rem;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 0.9375rem;
+  background-color: var(--background);
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+  outline: none;
+  border-color: var(--primary);
 }
 
 .checkbox-group {
@@ -185,190 +376,271 @@
   align-items: center;
 }
 
-.checkbox-label {
+.checkbox-group label {
   display: flex;
   align-items: center;
+  margin-bottom: 0;
   cursor: pointer;
 }
 
-.checkbox-label input {
-  margin-right: 0.5rem;
+.checkbox-group input {
   width: auto;
-}
-
-/* Image Upload */
-.image-upload-container {
-  margin-top: 1rem;
-}
-
-.upload-label {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.75rem 1rem;
-  background-color: #f5f5f5;
-  border-radius: 6px;
-  cursor: pointer;
-}
-
-.hidden-input {
-  display: none;
-}
-
-.file-preview, .current-image {
-  margin-top: 0.5rem;
-  font-size: 0.9rem;
-}
-
-.current-image img {
-  max-width: 100px;
-  max-height: 100px;
-  margin-top: 0.5rem;
-  border-radius: 4px;
-}
-
-/* Timetable */
-.timetable-container {
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-}
-
-.timetable {
-  width: 100%;
-  min-width: 600px;
-  border-collapse: collapse;
-}
-
-.timetable th, .timetable td {
-  border: 1px solid #ddd;
-  padding: 0.5rem;
-  text-align: center;
-}
-
-.timetable th {
-  background-color: #f5f5f5;
-  font-weight: 500;
-}
-
-.timetable-input {
-  width: 100%;
-  border: none;
-  text-align: center;
-  background: transparent;
+  margin-right: 8px;
 }
 
 /* Form Actions */
 .form-actions {
   display: flex;
-  justify-content: flex-end;
-  gap: 1rem;
-  padding: 1rem 0;
-}
-
-.primary-button, .secondary-button {
-  padding: 0.75rem 1.5rem;
-  border-radius: 6px;
-  font-weight: 500;
-  cursor: pointer;
+  justify-content: space-between;
+  padding: 16px;
+  margin-top: 16px;
 }
 
 .primary-button {
-  background-color: #1976d2;
+  background-color: var(--primary);
   color: white;
   border: none;
+  border-radius: 8px;
+  padding: 12px 24px;
+  font-weight: 600;
+  cursor: pointer;
+  flex: 1;
+  margin-left: 8px;
+  transition: background-color 0.2s;
+}
+
+.primary-button:hover {
+  background-color: var(--primary-dark);
 }
 
 .primary-button:disabled {
-  background-color: #90caf9;
+  opacity: 0.7;
   cursor: not-allowed;
 }
 
 .secondary-button {
   background: none;
-  border: 1px solid #ddd;
-  color: #333;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px 24px;
+  font-weight: 600;
+  cursor: pointer;
+  flex: 1;
+  margin-right: 8px;
+  transition: background-color 0.2s;
 }
 
-/* Error Message */
-.error-message {
-  background-color: #ffebee;
-  color: #d32f2f;
-  padding: 1rem;
-  margin: 1rem;
-  border-radius: 4px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+.secondary-button:hover {
+  background-color: rgba(0, 0, 0, 0.05);
 }
 
-.error-message button {
-  background: none;
-  border: none;
-  color: #d32f2f;
-  font-size: 1.2rem;
+.secondary-button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+/* Timetable Styles */
+.timetable-preview-section {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid #e0e0e0;
+}
+
+.timetable-preview-section details {
   cursor: pointer;
 }
 
-/* Empty State */
-.empty-state {
-  text-align: center;
-  padding: 2rem;
-}
-
-.empty-state p {
-  margin-bottom: 1rem;
+.timetable-preview-section summary {
+  font-size: 12px;
   color: #666;
+  padding: 4px 0;
 }
 
-/* Desktop Styles */
-@media (min-width: 768px) {
-  .mobile-header, .mobile-menu {
-    display: none;
+.timetable-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+  margin-top: 8px;
+}
+
+.timetable-table th,
+.timetable-table td {
+  border: 1px solid #ddd;
+  padding: 8px;
+  text-align: left;
+}
+
+.timetable-table th {
+  background-color: #f5f5f5;
+  font-weight: 600;
+}
+
+.timetable-table .time-slot {
+  background-color: #fafafa;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+/* Modal Styles */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  animation: fadeIn 0.3s ease;
+}
+
+.modal-content {
+  background: white;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 1200px;
+  max-height: 90vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  animation: slideUp 0.3s ease;
+}
+
+.timetable-modal {
+  max-width: 95%;
+  width: auto;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 24px;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.modal-header h2 {
+  margin: 0;
+  font-size: 20px;
+}
+
+.close-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #666;
+  transition: color 0.2s;
+}
+
+.close-button:hover {
+  color: #333;
+}
+
+.modal-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 24px;
+}
+
+.timetable-editor {
+  overflow-x: auto;
+}
+
+.timetable-table.editable td {
+  padding: 4px;
+}
+
+.timetable-input {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 12px;
+  transition: border-color 0.2s;
+}
+
+.timetable-input:focus {
+  outline: none;
+  border-color: #4CAF50;
+}
+
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 16px 24px;
+  border-top: 1px solid #e0e0e0;
+}
+
+/* Action Button for Timetable */
+.action-button.timetable {
+  background-color: #2196F3;
+  color: white;
+}
+
+.action-button.timetable:hover {
+  background-color: #1976D2;
+}
+
+/* Present Status */
+.present-status {
+  color: #4CAF50;
+  font-size: 12px;
+  margin-top: 4px;
+  font-weight: 500;
+}
+
+/* No Timetable Message */
+.no-timetable {
+  color: #999;
+  font-style: italic;
+  padding: 12px;
+  text-align: center;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
   }
-  
-  .desktop-header {
-    display: block;
-    padding: 1rem 2rem;
-  }
-  
-  .tabs {
-    display: flex;
-    gap: 1rem;
-    margin-top: 1rem;
-  }
-  
-  .tab-button {
-    padding: 0.5rem 1rem;
-    background: none;
-    border: none;
-    border-bottom: 2px solid transparent;
-    cursor: pointer;
-    font-size: 1rem;
-  }
-  
-  .tab-button.active {
-    border-bottom-color: #1976d2;
-    color: #1976d2;
-    font-weight: 500;
-  }
-  
-  .faculty-list {
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    padding: 1rem 2rem;
-  }
-  
-  .add-faculty-form {
-    padding: 1rem 2rem;
-  }
-  
-  .timetable {
-    min-width: auto;
+  to {
+    opacity: 1;
   }
 }
 
-/* Larger screens */
-@media (min-width: 1024px) {
-  .faculty-list {
-    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+@keyframes slideUp {
+  from {
+    transform: translateY(50px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .modal-content {
+    width: 95%;
+    max-height: 95vh;
+  }
+  
+  .timetable-table {
+    font-size: 10px;
+  }
+  
+  .timetable-input {
+    font-size: 10px;
+    padding: 4px;
+  }
+  
+  .modal-header h2 {
+    font-size: 18px;
   }
 }

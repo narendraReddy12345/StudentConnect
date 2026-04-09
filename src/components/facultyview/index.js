@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useHistory } from 'react-router-dom';
-import { collection, getDocs, query, where } from 'firebase/firestore';
+import { collection, getDocs, query, where, doc, getDoc } from 'firebase/firestore';
 import { ref, onValue, off } from 'firebase/database';
 import { db, realtimeDb } from '../../firebase';
-import { FiSearch, FiUser, FiMail, FiPhone, FiHome, FiChevronLeft } from 'react-icons/fi';
+import { FiSearch, FiUser, FiMail, FiPhone, FiHome, FiChevronLeft, FiClock, FiX, FiCalendar } from 'react-icons/fi';
 import './index.css';
 
 const FacultyList = () => {
@@ -19,6 +19,29 @@ const FacultyList = () => {
     current_status: 'Present',
     current_weight: 0
   });
+  const [selectedTimetable, setSelectedTimetable] = useState(null);
+  const [selectedFacultyName, setSelectedFacultyName] = useState('');
+  const [showTimetableModal, setShowTimetableModal] = useState(false);
+  const [currentDay, setCurrentDay] = useState(getCurrentDay());
+
+  // Get current day
+  function getCurrentDay() {
+    const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    return days[new Date().getDay()];
+  }
+
+  // Time slots
+  const timeSlots = [
+    '9:00 AM - 10:00 AM',
+    '10:00 AM - 11:00 AM',
+    '11:00 AM - 12:00 PM',
+    '12:00 PM - 1:00 PM',
+    '1:00 PM - 2:00 PM',
+    '2:00 PM - 3:00 PM',
+    '3:00 PM - 4:00 PM'
+  ];
+
+  const daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
   // Get department full name from code
   const getDeptName = (code) => {
@@ -53,7 +76,6 @@ const FacultyList = () => {
       console.error("Error listening to Realtime Database:", error);
     });
 
-    // Cleanup listener on unmount
     return () => {
       off(presenceRef, 'value', unsubscribe);
     };
@@ -65,6 +87,146 @@ const FacultyList = () => {
                      presenceData.current_status === 'Present';
     console.log(`Faculty ${registerNo} present: ${isPresent}`);
     return isPresent;
+  };
+
+  // Fetch faculty timetable
+  const fetchFacultyTimetable = async (facultyId, facultyName) => {
+    try {
+      const facultyRef = doc(db, 'faculty', facultyId);
+      const facultyDoc = await getDoc(facultyRef);
+      if (facultyDoc.exists()) {
+        const data = facultyDoc.data();
+        setSelectedTimetable(data.timetable || {});
+        setSelectedFacultyName(facultyName);
+        setShowTimetableModal(true);
+      }
+    } catch (err) {
+      console.error("Error fetching timetable:", err);
+      setError("Failed to load timetable");
+    }
+  };
+
+  // Get current time slot
+  const getCurrentTimeSlot = () => {
+    const now = new Date();
+    const currentHour = now.getHours();
+    const currentMinute = now.getMinutes();
+    
+    for (let slot of timeSlots) {
+      const [start, end] = slot.split(' - ');
+      const [startHour, startMinute] = parseTime(start);
+      const [endHour, endMinute] = parseTime(end);
+      
+      const currentTotalMinutes = currentHour * 60 + currentMinute;
+      const startTotalMinutes = startHour * 60 + startMinute;
+      const endTotalMinutes = endHour * 60 + endMinute;
+      
+      if (currentTotalMinutes >= startTotalMinutes && currentTotalMinutes <= endTotalMinutes) {
+        return slot;
+      }
+    }
+    return null;
+  };
+
+  const parseTime = (timeStr) => {
+    const [time, period] = timeStr.split(' ');
+    let [hour, minute] = time.split(':').map(Number);
+    if (period === 'PM' && hour !== 12) hour += 12;
+    if (period === 'AM' && hour === 12) hour = 0;
+    return [hour, minute];
+  };
+
+  // Render timetable view
+  const renderTimetableContent = () => {
+    if (!selectedTimetable || Object.keys(selectedTimetable).length === 0) {
+      return (
+        <div className="empty-timetable">
+          <FiCalendar size={48} />
+          <p>No timetable set for this faculty</p>
+        </div>
+      );
+    }
+
+    const currentSlot = getCurrentTimeSlot();
+    const todaySchedule = selectedTimetable[currentDay] || {};
+
+    return (
+      <div className="timetable-container">
+        {/* Day Selector */}
+        <div className="day-selector">
+          {daysOfWeek.map(day => (
+            <button
+              key={day}
+              className={`day-btn ${currentDay === day ? 'active' : ''}`}
+              onClick={() => setCurrentDay(day)}
+            >
+              {day.slice(0, 3)}
+            </button>
+          ))}
+        </div>
+
+        {/* Today's Schedule Highlight */}
+        <div className="today-schedule">
+          <div className="today-header">
+            <h3>{currentDay}'s Schedule</h3>
+            <span className="today-badge">Today</span>
+          </div>
+          
+          <div className="schedule-list">
+            {timeSlots.map(slot => {
+              const subject = todaySchedule[slot];
+              const isCurrentSlot = currentSlot === slot && currentDay === getCurrentDay();
+              
+              if (!subject) return null;
+              
+              return (
+                <div key={slot} className={`schedule-item ${isCurrentSlot ? 'current' : ''}`}>
+                  <div className="schedule-time">
+                    <FiClock size={14} />
+                    <span>{slot}</span>
+                    {isCurrentSlot && <span className="live-badge">LIVE</span>}
+                  </div>
+                  <div className="schedule-subject">{subject}</div>
+                </div>
+              );
+            })}
+            
+            {Object.keys(todaySchedule).length === 0 && (
+              <div className="no-classes">
+                <p>No classes scheduled for {currentDay}</p>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Full Week View Toggle */}
+        <details className="full-week-view">
+          <summary>View Full Week Schedule</summary>
+          <div className="week-schedule">
+            {daysOfWeek.map(day => {
+              const daySchedule = selectedTimetable[day] || {};
+              const hasClasses = Object.keys(daySchedule).length > 0;
+              
+              return (
+                <div key={day} className="day-schedule">
+                  <h4 className="day-title">{day}</h4>
+                  {hasClasses ? (
+                    Object.entries(daySchedule).map(([slot, subject]) => (
+                      <div key={slot} className="week-schedule-item">
+                        <span className="week-time">{slot}</span>
+                        <span className="week-subject">{subject}</span>
+                      </div>
+                    ))
+                  ) : (
+                    <p className="no-schedule">No classes</p>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </details>
+      </div>
+    );
   };
 
   useEffect(() => {
@@ -207,8 +369,8 @@ const FacultyList = () => {
                 <div key={member.id} className="faculty-item">
                   <div className="item-content">
                     <div className="avatar-container">
-                      {member.imageUrl ? (
-                        <div className="avatar-wrapper">
+                      <div className="avatar-wrapper">
+                        {member.imageUrl ? (
                           <img 
                             src={member.imageUrl} 
                             alt={member.name} 
@@ -219,23 +381,24 @@ const FacultyList = () => {
                               e.target.className = 'avatar-error';
                             }}
                           />
-                          {/* Instagram-style online indicator */}
-                          <div className={`online-dot ${isPresent ? 'active' : 'inactive'}`}></div>
-                        </div>
-                      ) : (
-                        <div className="avatar-wrapper">
+                        ) : (
                           <div className="avatar-placeholder">
                             <FiUser size={20} />
                           </div>
-                          {/* Instagram-style online indicator */}
-                          <div className={`online-dot ${isPresent ? 'active' : 'inactive'}`}></div>
-                        </div>
-                      )}
+                        )}
+                        <div className={`online-dot ${isPresent ? 'active' : 'inactive'}`}></div>
+                      </div>
                     </div>
                     
                     <div className="faculty-info">
                       <div className="info-header">
                         <h3 className="faculty-name">{member.name}</h3>
+                        <button 
+                          className="timetable-icon-btn"
+                          onClick={() => fetchFacultyTimetable(member.id, member.name)}
+                        >
+                          <FiClock size={18} />
+                        </button>
                       </div>
                       
                       <p className="department">{getDeptName(member.department)}</p>
@@ -269,6 +432,35 @@ const FacultyList = () => {
           </div>
         )}
       </main>
+
+      {/* Instagram-style Timetable Modal */}
+      {showTimetableModal && (
+        <div className="instagram-modal-overlay" onClick={() => setShowTimetableModal(false)}>
+          <div className="instagram-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="instagram-modal-header">
+              <div className="modal-header-content">
+                <div className="faculty-info-mini">
+                  <FiUser size={20} />
+                  <div>
+                    <h3>{selectedFacultyName}</h3>
+                    <p>Weekly Schedule</p>
+                  </div>
+                </div>
+                <button 
+                  className="close-modal-btn"
+                  onClick={() => setShowTimetableModal(false)}
+                >
+                  <FiX size={24} />
+                </button>
+              </div>
+            </div>
+            
+            <div className="instagram-modal-body">
+              {renderTimetableContent()}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
