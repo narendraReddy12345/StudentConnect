@@ -303,7 +303,7 @@ const FacultyList = () => {
         <div className="current-status">
           <div className="status-info">
             <span className="info-label">Current:</span>
-            <span className="info-value">{presenceData.current_register_no || 'None'}</span>
+           
           </div>
           <div className="status-info">
             <span className="info-label">Status:</span>

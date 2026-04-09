@@ -18,7 +18,7 @@ const MEMES = [
 ];
 
 const collegeDomain = "@klu.ac.in";
-const adminEmail = "99220041116@klu.ac.in";
+const adminEmail = ["99220041116@klu.ac.in","99220041119@klu.ac.in","99220041356@klu.ac.in"];
 
 const Login = ({ setUser }) => {
   const [email, setEmail] = useState("");
